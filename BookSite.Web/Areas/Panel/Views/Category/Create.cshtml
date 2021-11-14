@@ -1,0 +1,84 @@
+﻿@model BookSite.Data.Entities.Category
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Category/Index">Kategoriler</a></li>
+                    <li class="breadcrumb-item active">Kategori Ekle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kategori Ekleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Kategori Adı*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtName">
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Create(this)" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Category/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function Create(item) {
+        var name = $("#txtName").val();
+        if (name == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Kategori adı boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                async: true,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: name,
+                dataType: 'json',
+                url: '/Panel/Category/Create?name=' + name,
+                success: function (data) {
+                        Swal.fire(
+                            'Başarılı!',
+                            name + '  adlı kategori eklendi.',
+                            'success'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/Category/Index')
+                        })
+                },
+
+                error: function (data) {
+
+                    swal.fire({
+                        title: "Başarısız",
+                        text: "Eklenemedi.",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    };
+</script>

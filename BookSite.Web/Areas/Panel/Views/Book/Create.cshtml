@@ -1,0 +1,188 @@
+﻿@model BookSite.Data.Entities.Book
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.min.css">
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.1/i18n/jquery-ui-i18n.min.js"></script>
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Book/Index">Kitaplar</a></li>
+                    <li class="breadcrumb-item active">Kitap Ekle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kitap Ekleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Kitap Adı*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtName">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">İçerik</label>
+                    <div class="col-8 col-xl-9">
+                        <textarea type="text" id="txtContent" style="height:200px" class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">ISBN</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtISBN" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Sayfa Sayısı</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtPageCount" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Boyut </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtSize" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Yayın Tarihi </label>
+                    <div class="col-8 col-xl-9">
+                        @*<input class="form-control" id="txtPublishdate" type="date" name="date">*@  
+                        <input type="text" class="form-control" data-toggle="input-mask" data-mask-format="00/00/0000" maxlength="10" id="txtPublishdate" >
+                        <span class="font-13 text-muted">e.g "DD/MM/YYYY"</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Fiyat (₺) * </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtPrice" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">İndirim Oranı (0-100 arasında) * </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtDiscount" value="0" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">En Çok Satanlar Durumu *</label>
+                    <div class="col-8 col-xl-9">
+                        <div class="mb-3 col-md-4">
+                            <select id="BestSellerStatus" class="form-select">
+                                <option value="Seçiniz">Seçiniz</option>
+                                <option value="true">Evet</option>
+                                <option value="false">Hayır</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Yeni Çıkanlar Durumu * </label>
+                    <div class="col-8 col-xl-9">
+                        <div class="mb-3 col-md-4">
+                            <select id="NewReleasesStatus" class="form-select">
+                                <option value="Seçiniz">Seçiniz</option>
+                                <option value="true">Evet</option>
+                                <option value="false">Hayır</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Kampanya Durumu * </label>
+                    <div class="col-8 col-xl-9">
+                        <div class="mb-3 col-md-4">
+                            <select id="DealsStatus" class="form-select">
+                                <option value="Seçiniz">Seçiniz</option>
+                                <option value="true">Evet</option>
+                                <option value="false">Hayır</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Create(this)" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Default/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div> 
+    </div>
+
+
+
+
+</div>
+
+<script>
+    function Create(item) {
+        var book = new Object();
+        book.name = $("#txtName").val();
+        book.content = $("#txtContent").val();
+        book.pagecount = $("#txtPageCount").val();
+        book.size = $("#txtSize").val();
+        book.publishdate = $("#txtPublishdate").val();
+        book.price = $("#txtPrice").val();
+        book.discountpercentage = $("#txtDiscount").val();
+        book.BestSellerStatus = $("#BestSellerStatus").val();
+        book.NewReleasesStatus = $("#NewReleasesStatus").val();
+        book.DealsStatus = $("#DealsStatus").val();
+        book.ISBN =$("#txtISBN").val();
+
+        if (book.name == "" || book.price == "" || book.BestSellerStatus == "Seçiniz" || book.NewReleasesStatus == "Seçiniz" || book.DealsStatus == "Seçiniz" ) {
+            Swal.fire(
+                'Başarısız!',
+                'Kitap adı, Fiyatı,Yeni çıkanlar, Çok satanlar, Kampanya durumu  boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Panel/Book/Create",
+                data: JSON.stringify(book),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                        book.name + '  adlı kitap eklendi.',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/Book/Index')
+                    })
+                },
+
+                error: function (data) {
+
+                    swal.fire({
+                        title: "Başarısız",
+                        text: "Eklenemedi.",
+                        icon: "error"
+                    }).then(function () {
+                        location.reload();
+                    })
+                }
+            });
+        }
+    }
+</script>
+
+
+

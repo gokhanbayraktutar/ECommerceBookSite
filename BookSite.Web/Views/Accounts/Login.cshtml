@@ -1,0 +1,93 @@
+﻿@using BookSite.Web.Methods
+@{
+   
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var siteConstant = db.SiteConstants.FirstOrDefault();
+    string pageHeader = "Giriş";
+    ViewBag.Title = SeoHelper.HeaderWriter(siteConstant.Header, pageHeader);
+
+}
+
+<main class="page-section inner-page-sec-padding-bottom">
+    <div class="container">
+        @if (TempData["uyari"] != null)
+        {
+            <div class="alert alert-success" role="alert" style="width:400px">
+                Profil Bilgilerinizi Güncellediğinizden Dolayı Tekrar Giriş Yapmanız Gerekmektedir!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            TempData["uyari"] = null;
+        }
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-6 col-xs-12" style="margin: auto; background-color: #dedede;">
+                <form enctype="multipart/form-data" action="/giris" role="form" method="post">
+                    <div class="login-form">
+                        <h4 class="login-title">Giriş</h4>
+                        <div class="row">
+                            <div class="col-md-12 col-12 mb--15">
+                                <label for="email">E-mail</label>
+                                <input class=" col-md-8 col-10 mb-0 form-control" type="email" name="Email"
+                                       placeholder="E-mail adresinizi giriniz..." required>
+                            </div>
+
+                            <div class="col-12 mb--20">
+                                <label for="password">Şifre</label>
+                                <input class="col-md-8 col-10 mb-0 form-control" type="password" name="Password" placeholder="Şifre giriniz..." required>
+                            </div>
+                            @if (TempData["kaydol"] != null)
+                            {
+                                <div class="alert alert-success" role="alert" style="width:400px">
+                                    Kayıt Başarılı.
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                TempData["kaydol"] = null;
+                            }
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="alert alert-danger" role="alert" style="width:300px">
+                                    @ViewBag.Error
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                            }
+                            @*localhost*@
+                            <div class="g-recaptcha" data-sitekey="6LcBa68cAAAAAH7BzVFwUqRFBlSBlUapksr59TFH" style="margin-left: 18px;"></div>
+
+                            @*WebSite*@
+                            @*<div class="g-recaptcha" data-sitekey="6Le7xDMdAAAAAIF1DxQIUteOlFVKJaOagRACLy0y" style="margin-left: 18px;"></div>*@
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-outlined">Giriş</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

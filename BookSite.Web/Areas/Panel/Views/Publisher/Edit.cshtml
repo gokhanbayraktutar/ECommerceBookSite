@@ -1,0 +1,86 @@
+﻿@model BookSite.Data.Entities.Publisher
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Publisher/Index">Yayıncılar</a></li>
+                    <li class="breadcrumb-item active">Yayıncı Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Yayıncı Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Yayıncı Adı*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" value="@Model.Name" id="txtName">
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Publisher/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function Edit(item) {
+        var publisherdata = new Object();
+        publisherdata.id = $(item).attr("itemid");
+        publisherdata.name = $("#txtName").val();
+
+        if (publisherdata.name == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Yayıncı adı boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Panel/Publisher/Edit",
+                data: JSON.stringify(publisherdata),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                        'Yayıncı düzenlendi',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/Publisher/Index')
+                    })
+                },
+
+                error: function () {
+
+                    swal.fire({
+                        title: "Başarısız!",
+                        text: "Düzenlenemedi!",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    }
+</script>

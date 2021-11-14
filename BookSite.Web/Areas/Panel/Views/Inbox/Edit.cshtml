@@ -1,0 +1,132 @@
+﻿@model BookSite.Data.Entities.Inbox
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Inbox/Index">Gelen Mesajlar</a></li>
+                    <li class="breadcrumb-item active">Gelen Mesajlar Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Gelen Mesajlar</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Ad Soyad:</label>
+                    <label class="col-8 col-xl-9 col-form-label">@Model.Name</label>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Email:</label>
+                    <label class="col-8 col-xl-9 col-form-label">@Model.Mail</label>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Telefon:</label>
+                    <label class="col-8 col-xl-9 col-form-label">@Model.Phone</label>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">IP:</label>
+                    <label class="col-8 col-xl-9 col-form-label">@Model.IP</label>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Mesaj Tarihi:</label>
+                    <label class="col-8 col-xl-9 col-form-label">@Model.DateTime</label>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Mesaj:</label>
+                    <button type="button" class="btn btn-info  " data-bs-toggle="modal" data-bs-target="#scrollable-modal" style="max-width:35%">Mesajı  Görüntüle</button>
+                </div>
+               
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Okundu Durumu:</label>
+                    <div class="col-8 col-xl-9 col-form-label">
+                        <select class="form-select" id="ReadStatus">
+                            @if (Model.Read == "Evet")
+                            {
+                                <option value="Evet">Evet</option>
+                                <option value="Hayır">Hayır</option>
+                            }
+                            else if (Model.Read == "Hayır")
+                            {
+                                <option value="Hayır">Hayır</option>
+                                <option value="Evet">Evet</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Inbox/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function Edit(item) {
+        var id = $(item).attr("itemid");
+        var ReadStatus = $("#ReadStatus").val();
+
+        $.ajax({
+            async: true,
+            type: "POST",
+            contentType: false,
+            processData: false,
+            data: id,
+            dataType: 'json',
+            url: '/Panel/Inbox/Edit?id=' + id + '&ReadStatus=' + ReadStatus,
+            success: function (data) {
+                Swal.fire(
+                    'Başarılı!',
+                    'Düzenlendi.',
+                    'success'
+                ).then(function () {
+                    $(window).attr('location', '/Panel/Inbox/Index')
+                })
+            },
+
+            error: function () {
+
+                swal.fire({
+                    title: "Başarısız!",
+                    text: "Düzenlenemedi!",
+                    icon: "error"
+                });
+            }
+        });
+
+    }
+</script>
+
+
+<div class="modal fade" id="scrollable-modal" tabindex="-1" role="dialog"
+     aria-labelledby="scrollableModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scrollableModalTitle">Mesaj</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Model.Messsage
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>  
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->  

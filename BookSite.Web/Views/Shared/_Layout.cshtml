@@ -1,0 +1,1004 @@
+﻿@using BookSite.Web.Methods
+@{ BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var siteconstant = db.SiteConstants.FirstOrDefault();
+
+    var contactpage = db.ContactPages.FirstOrDefault();
+
+    var user = db.Users.FirstOrDefault(x => x.Email == User.Identity.Name);
+
+    var categorylist = db.Categories.ToList();
+
+    var categorylist1 = db.Categories.Take(8).ToList();
+
+    var categorylist2 = db.Categories.OrderBy(x => x.Id).Skip(8).Take(8).ToList();
+
+    var categorylist3 = db.Categories.OrderBy(x => x.Id).Skip(16).Take(8).ToList();
+
+    var categorylist4 = db.Categories.OrderBy(x => x.Id).Skip(24).Take(8).ToList();
+
+    var books = db.Books.ToList();
+    var authors = db.Authors.ToList();
+
+
+    var book_pictures = db.Book_Pictures.ToList();
+
+
+    var cart = new BookSite.Data.Entities.Cart();
+    var cartContents = new List<BookSite.Data.Entities.CartContent>();
+
+    if (user != null)
+    {
+        cart = db.Carts.FirstOrDefault(x => x.UserID == user.Id && x.OrderStatus == "In Cart");
+        if (cart == null)
+        {
+            cart = new BookSite.Data.Entities.Cart();
+            cart.UserID = user.Id;
+            cart.OrderStatus = "In Cart";
+            cart.SessionId = Session.SessionID;
+            cart.TotalPrice = 0;
+            cart.CargoPrice = 0;
+            cart.Name = user.Name;
+            cart.LastName = user.Lastname;
+            cart.PhoneNumber = user.Phone;
+            cart.Email = user.Email;
+            cart.OrderDate = DateTime.Now;
+            db.Carts.Add(cart);
+            db.SaveChanges();
+        }
+        else
+        {
+            cartContents = db.CartContents.Where(x => x.CartId == cart.Id).ToList();
+        }
+    }
+    else
+    {
+        cart = db.Carts.FirstOrDefault(x => x.SessionId == Session.SessionID && x.OrderStatus == "In Cart");
+        if (cart != null)
+        {
+            cartContents = db.CartContents.Where(x => x.CartId == cart.Id).ToList();
+        }
+        else
+        {
+
+            cart = new BookSite.Data.Entities.Cart();
+            cart.OrderStatus = "In Cart";
+            cart.SessionId = Session.SessionID;
+            cart.TotalPrice = 0;
+            cart.CargoPrice = 0;
+            cart.OrderDate = DateTime.Now;
+            db.Carts.Add(cart);
+            db.SaveChanges();
+        }
+    }
+
+}
+
+
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+    @Html.Partial("_StylesPartial")
+</head>
+<body>
+    <div class="site-wrapper" id="top">
+        <div class="site-header header-2 mb--20 d-none d-lg-block">
+            <div class="header-middle pt--10 pb--10">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-3">
+                            <a href="/" class="site-brand">
+                                <img src="~/Upload/Image/@siteconstant.Logo" alt="">
+                            </a>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="header-search-block">
+                                <form action="/arama" role="form" method="post" enctype="multipart/form-data">
+                                    <input type="text" name="search" placeholder="Kitap / Yazar / Yayınevi Ara">
+                                    <button type="submit">Ara</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="main-navigation flex-lg-right">
+                                <div class="cart-widget">
+
+                                    @if (Session["Email"] != null)
+                                    {
+                                      
+                                        <div class="dropdown">
+                                            <button class="dropbtn">Hesabım</button>
+                                            <div class="dropdown-content">
+                                                <a href="/hesabım">Hesap Bilgilerim</a>
+                                                <a href="/siparislerim">Siparişlerim</a>
+                                                <a href="/favorilerim">Favorilerim</a>
+                                                <a href="karsilastirmaliste">Karşılaştırma Listem</a>
+                                                <a href="/cikis">Çıkış Yap</a>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="login-block">
+                                            <a href="/giris" class="font-weight-bold">GİRİŞ</a> <br>
+                                            <a href="/kaydol">Kaydol</a>
+                                        </div>
+                                    }
+
+
+                                    <div class="cart-block">
+                                        <div class="cart-total" id="CartDetail">
+                                            <span class="text-number">
+                                                @try
+                                                {
+                                                    @cartContents.Count
+                                                }
+                                                catch (Exception)
+                                                {
+                                                    @("0")
+                                                }
+                                            </span>
+                                            <span class="text-item">
+                                                Sepet
+                                            </span>
+                                            <span class="price">
+                                                @SeoHelper.ShowPrice(cart.TotalPrice, 2) ₺
+                                                <i class="fas fa-chevron-down"></i>
+                                            </span>
+                                        </div>
+                                        <div class="cart-dropdown-block" id="CartItem">
+                                            @foreach (var item in cartContents)
+                                            {
+                                                try
+                                                {
+                                                    var book = db.Books.FirstOrDefault(x => x.Id == item.BookId);
+                                                    var bookImage = db.Book_Pictures.FirstOrDefault(x => x.BookId == book.Id);
+                                                    <div class=" single-cart-block " id="row1_@item.Id">
+                                                        <div class="cart-product">
+                                                            <a href="/kitapdetay/@book.Id" class="image">
+                                                                <img src="~/Upload/Image/@bookImage.Picture" alt="">
+                                                            </a>
+                                                            <div class="content">
+                                                                <h3 class="title">
+                                                                    <a href="/kitapdetay/@book.Id">
+                                                                        @book.Name
+                                                                    </a>
+                                                                </h3>
+                                                                <p class="price"><span class="qty">@item.Count ×</span> @SeoHelper.ShowPrice(Convert.ToDouble(item.Price), 2) ₺</p>
+                                                                <a class="cross-btn" itemscope itemid="@(item.Id)" onclick="DeleteItem(this)"><i class="fas fa-times"></i></a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                catch (Exception)
+                                                {
+
+                                                }
+                                            }
+
+
+
+                                            <div class=" single-cart-block ">
+                                                <div class="btn-block">
+                                                    <a href="/sepetim" class="btn">
+                                                        Sepete Git <i class="fas fa-chevron-right"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-bottom bg-primary">
+                <div class="container">
+                    <div class="row align-items-center">
+                        @*<div class="col-lg-3">
+                                <div class="site-mini-search" style="margin-top:20px;">
+                                    <form action="/Search/CategorySearch" enctype="multipart/form-data" role="form" method="post">
+                                        <input type="text" name="search" placeholder="Kategori Ara">
+                                        <button><i class="fas fa-search"></i></button>
+                                    </form>
+                                </div>
+                            </div>*@
+                        <div class="header-phone color-white" style="margin-left:28px">
+                            <div class="icon">
+                                <span class="icon"><i class="fa fa-phone"></i></span>
+                            </div>
+                            <div class="text" style="display: flex; align-self: center">
+                                <p class="font-weight-bold number"><a href="tel:@contactpage.Phone">@contactpage.Phone</a></p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-10">
+                            <div class="main-navigation flex-lg-right">
+                                <ul class="main-menu menu-right main-menu--white li-last-0">
+                                    <li class="menu-item has-children mega-menu">
+                                        <a href="javascript:void(0)">
+                                            Kategoriler <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                        </a>
+                                        <ul class="sub-menu four-column">
+                                            <li class="cus-col-25">
+                                                <ul class="mega-single-block">
+                                                    @foreach (var cat in categorylist1)
+                                                    {
+                                                        <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                            <li class="cus-col-25">
+                                                <ul class="mega-single-block">
+                                                    @foreach (var cat in categorylist2)
+                                                    {
+                                                        <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                            <li class="cus-col-25">
+                                                <ul class="mega-single-block">
+                                                    @foreach (var cat in categorylist3)
+                                                    {
+                                                        <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                            <li class="cus-col-25">
+                                                <ul class="mega-single-block">
+                                                    @foreach (var cat in categorylist4)
+                                                    {
+                                                        <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    @*<li class="menu-item">
+                                            <a href="/Category/Index">Kategoriler</a>
+                                        </li>*@
+                                    <li class="menu-item">
+                                        <a href="/yenicikankitaplar">Yeni Çıkanlar</a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/coksatankitaplar">Çok Satanlar</a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/kampanyalikitaplar">Kampanyalı Kitaplar</a>
+                                    </li>
+
+                                    @*<li class="menu-item has-children">
+                                            <a href="#">Kitaplar <i class="fas fa-chevron-down dropdown-arrow"></i></a>
+                                            <ul class="sub-menu">
+                                                <li>
+                                                    <a href="/NewBook/Index">Yeni Çıkanlar</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/BestSeller/Index">Çok Satanlar</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/DealBook/Index">Kampanyalı Kitaplar</a>
+                                                </li>
+                                            </ul>
+                                        </li>*@
+                                    <li class="menu-item">
+                                        <a href="/yazarlar">Yazarlar</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="site-mobile-menu">
+            <header class="mobile-header d-block d-lg-none pt--10 pb-md--10">
+                <div class="container">
+                    <div class="row align-items-sm-end align-items-center">
+                        <div class="col-md-4 col-7">
+                            <a href="index.html" class="site-brand">
+                                <img src="~/Upload/Image/@siteconstant.Logo" alt="">
+                            </a>
+                        </div>
+                        <div class="col-md-5 order-3 order-md-2">
+                            <nav class="category-nav   ">
+                                <div>
+                                    <div class="header-search-block">
+                                        <form action="#" role="form" method="post" enctype="multipart/form-data">
+                                            <input type="text" name="search" placeholder="Kitap / Yazar / Yayınevi Ara">
+                                            <button>Ara</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+                        <div class="col-md-3 col-5  order-md-3 text-right">
+                            <div class="mobile-header-btns header-top-widget">
+                                <ul class="header-links">
+                                    <li class="sin-link">
+                                        <a href="cart.html" class="cart-link link-icon"><i class="ion-bag"></i></a>
+                                    </li>
+                                    <li class="sin-link">
+                                        <a href="javascript:" class="link-icon hamburgur-icon off-canvas-btn">
+                                            <i class="ion-navicon"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!--Off Canvas Navigation Start-->
+            <aside class="off-canvas-wrapper">
+                <div class="btn-close-off-canvas">
+                    <i class="ion-android-close"></i>
+                </div>
+                <div class="off-canvas-inner">
+                    <!-- search box start -->
+                    <!--<div class="search-box offcanvas">
+                        <form action="/arama" role="form" method="post" enctype="multipart/form-data">
+                            <input type="text" name="search" placeholder="Kitap / Yazar / Yayınevi Ara">
+                            <button class="search-btn"><i class="ion-ios-search-strong"></i></button>
+                        </form>
+                    </div>-->
+                    <!-- search box end -->
+                    <!-- mobile menu start -->
+                    <div class="mobile-navigation">
+                        <!-- mobile menu navigation start -->
+                        <nav class="off-canvas-nav">
+                            <ul class="mobile-menu main-mobile-menu">
+                                <li class="menu-item">
+                                    <a href="/kategoriler">Kategoriler</a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="/yenicikankitaplar">Yeni Çıkanlar</a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="/coksatankitaplar">Çok Satanlar</a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="/kampanyalikitaplar">Kampanyalı Kitaplar</a>
+                                </li>
+                                @*<li><a href="/iletişim">İletişim</a></li>*@
+                            </ul>
+                        </nav>
+                        <!-- mobile menu navigation end -->
+                    </div>
+                    <!-- mobile menu end -->
+                    <nav class="off-canvas-nav">
+                        <ul class="mobile-menu menu-block-2">
+                            <li class="menu-item-has-children">
+                                <a href="#">Hesabım <i class="fas fa-angle-down"></i></a>
+                                <ul class="sub-menu">
+                                    <li>
+                                        @if (Session["Email"] != null)
+                                        {
+                                            <a href="/hesabım" class="font-weight-bold">Hesabım</a> <br>
+                                            <a href="/cikis">Çıkış Yap</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="/giris" class="font-weight-bold">GİRİŞ</a> <br>
+                                            <a href="/kaydol">Kaydol</a>
+                                        }
+                                    </li>
+                                </ul>
+                        </ul>
+                    </nav>
+                    <div class="off-canvas-bottom">
+                        <div class="off-canvas-bottom">
+                            <div class="contact-list mb--10">
+                                <a href="tel:@contactpage.Phone" class="sin-contact"><i class="fas fa-mobile-alt"></i>@contactpage.Phone</a>
+                                <a href="mailto:@contactpage.Email1" class="sin-contact"><i class="fas fa-envelope"></i>@contactpage.Email1</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </aside>
+            <!--Off Canvas Navigation End-->
+        </div>
+        <div class="sticky-init fixed-header common-sticky" id="sticky">
+            <div class="container d-none d-lg-block">
+                <div class="row align-items-center">
+                    <div class="col-lg-4">
+                        <a href="/" class="site-brand">
+                            <img src="~/Upload/Image/@siteconstant.Logo" alt="">
+                        </a>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="main-navigation flex-lg-right">
+                            <ul class="main-menu menu-right ">
+                                <li class="menu-item has-children mega-menu">
+                                    <a href="javascript:void(0)">
+                                        Kategoriler <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                    </a>
+                                    <ul class="sub-menu four-column">
+                                        <li class="cus-col-25">
+                                            <ul class="mega-single-block">
+                                                @foreach (var cat in categorylist1)
+                                                {
+                                                    <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                }
+                                            </ul>
+                                        </li>
+                                        <li class="cus-col-25">
+                                            <ul class="mega-single-block">
+                                                @foreach (var cat in categorylist2)
+                                                {
+                                                    <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                }
+                                            </ul>
+                                        </li>
+                                        <li class="cus-col-25">
+                                            <ul class="mega-single-block">
+                                                @foreach (var cat in categorylist3)
+                                                {
+                                                    <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                }
+                                            </ul>
+                                        </li>
+                                        <li class="cus-col-25">
+                                            <ul class="mega-single-block">
+                                                @foreach (var cat in categorylist4)
+                                                {
+                                                    <li><a href="/kategorikitap/@cat.Id">@cat.Name</a></li>
+                                                }
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="/yenicikankitaplar">Yeni Çıkanlar</a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="/coksatankitaplar">Çok Satanlar</a>
+
+                                </li>
+                                <li class="menu-item">
+                                    <a href="/kampanyalikitaplar">Kampanyalı Kitaplar</a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="/yazarlar">Yazarlar</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <center>
+                        <div class="alert alert-danger" role="alert" id="alertuserCompare" style="display:none ;width:800px">
+                            Karşılaştırma listesine eklemek için
+                            <a href="/giris">oturum açın</a> ya da <a href="/kaydol"> yeni hesap oluşturun!</a>
+
+                            <button type="button" onclick="document.getElementById('alertuserCompare').style.display = 'none';" class="close" @*data-dismiss="alert"*@ @*aria-label="Close"*@>
+                                <span @*aria-hidden="true"*@>&times;</span>
+                            </button>
+                        </div>
+                        <div class="alert alert-danger" role="alert" id="alertuserfav" style="display:none ;width:800px">
+                            Favorilere eklemek için
+                            <a href="/giris">oturum açın</a> ya da <a href="/kaydol"> yeni hesap oluşturun!</a>
+
+                            <button type="button" onclick="document.getElementById('alertuserfav').style.display = 'none';" class="close" @*data-dismiss="alert"*@ @*aria-label="Close"*@>
+                                <span @*aria-hidden="true"*@>&times;</span>
+                            </button>
+                        </div>
+                        <div class="alert alert-success" role="alert" id="alertsuccessfav" style="display: none; width: 500px">
+                            Favorilere eklendi.
+                            <button type="button" onclick="document.getElementById('alertsuccessfav').style.display = 'none';" class="close" @*data-dismiss="alert"*@ @*aria-label="Close"*@>
+                                <span @*aria-hidden="true"*@>&times;</span>
+                            </button>
+                        </div>
+                        <div class="alert alert-success" role="alert" id="alertdeletefav" style="display: none; width: 500px">
+                            Favorilerden silindi.
+                            <button type="button" onclick="document.getElementById('alertdeletefav').style.display = 'none';" class="close" @*data-dismiss="alert"*@ @*aria-label="Close"*@>
+                                <span @*aria-hidden="true"*@>&times;</span>
+                            </button>
+                        </div>
+                        <div class="alert alert-success" role="alert" id="alertsuccessCompare" style="display: none; width: 500px">
+                            Karşılaştırma listesine eklendi.
+                            <button type="button" onclick="document.getElementById('alertsuccessCompare').style.display = 'none';" class="close" @*data-dismiss="alert"*@ @*aria-label="Close"*@>
+                                <span @*aria-hidden="true"*@>&times;</span>
+                            </button>
+                        </div>
+                        <div class="alert alert-danger" role="alert" id="alertCountCompare" style="display:none;width:800px">
+                            En fazla 2 kitap eklenebilir!
+                            <button type="button" onclick="document.getElementById('alertCountCompare').style.display = 'none';" class="close" @*data-dismiss="alert"*@ @*aria-label="Close"*@>
+                                <span @*aria-hidden="true"*@>&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="alert alert-danger" role="alert" id="alertCompareWarning" style="display: none; width: 500px">
+                            Bu kitap listede var!
+                            <button type="button" onclick="document.getElementById('alertCompareWarning').style.display = 'none';" class="close" @*data-dismiss="alert"*@ @*aria-label="Close"*@>
+                                <span @*aria-hidden="true"*@>&times;</span>
+                            </button>
+                        </div>
+
+                    </center>
+                </div>
+
+
+            </div>
+
+
+        </div>
+        @RenderBody()
+    </div>
+
+
+    <footer class="site-footer">
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row justify-content-between  section-padding">
+                    <div class=" col-xl-7 col-lg-7 col-sm-7 col-xs-3 d-none d-sm-block" style="margin-right: 16px">
+                        <div class="row single-footer pb--40">
+                            <table class="footer-list normal-list">
+                                <tr class="footer-tr">
+                                    <td><a href="/" title="Anasayfa">Anasayfa</a></td>
+                                    <td><a href="/kategoriler" title="Kategoriler">Kategoriler</a></td>
+                                    <td> <a href="/coksatankitaplar">Çok Satanlar</a></td>
+                                    <td> <a href="/yazarlar">Yazarlar</a></td>
+                                    @*<td><a href="/iletisim" title="İletişim">İletişim</a></td>*@
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="row">
+                            <div class="single-footer pb--40">
+                                <div class="footer-contact">
+                                    <p>
+                                        <span style="color: #fff" class="label">Adres:</span>
+                                        <span class="text">
+                                            @contactpage.Address
+                                        </span>
+                                    </p>
+                                    <p><span style="color: #fff" class="label">Telefon:</span><span class="text"> @contactpage.Phone</span></p>
+                                    <p><span style="color: #fff" class="label">Email:</span><span class="text">@contactpage.Email1</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" col-xl-5 col-lg-5 col-sm-5" style="margin-right: -16px; display: flex; align-self: center;">
+                        <div class="single-footer pb--40">
+                            <div class="brand-footer footer-title">
+                                <img src="~/Upload/Image/@siteconstant.Logo" alt="">
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="container">
+                <p class="copyright-text">
+                    Copyright © 2021 <a href="mailto:bayraktutargokhan@gmail.com" class="author">Gökhan Bayraktutar</a>  Tüm Hakları Saklıdır
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    @Html.Partial("_ScriptsPartial")
+
+</body>
+</html>
+
+
+
+@foreach (var book in books)
+{
+    var book_Author = 0;
+    try
+    {
+        book_Author = db.Book_Authors.FirstOrDefault(x => x.BookId == book.Id).AuthorId;
+    }
+    catch (Exception)
+    {
+
+    }
+
+    <div class="modal fade modal-quick-view" id="quickModal@(book.Id)" tabindex="-1" role="dialog"
+         aria-labelledby="quickModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <button type="button" class="close modal-close-btn ml-auto" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div class="product-details-modal">
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <div class="single-slide">
+                                <img src="~/Upload/Image/@db.Book_Pictures.FirstOrDefault(x => x.BookId == book.Id).Picture " alt="">
+                            </div>
+                        </div>
+                        <div class="col-lg-7 mt--30 mt-lg--30">
+                            <div class="product-details-info pl-lg--30 ">
+                                <h3 class="product-title">@book.Name</h3>
+                                <ul class="list-unstyled">
+
+                                    <li>
+                                        Yazar: <span class="list-value">
+                                            @try
+                                            {
+                                                @authors.FirstOrDefault(x => x.Id == book_Author).Name
+                                            }
+                                            catch (Exception)
+                                            {
+
+                                            }
+                                        </span>
+                                    </li>
+                                    <li>ISBN: <span class="list-value"> @book.ISBN</span></li>
+                                    <li>Yayın Tarihi: <a href="#" class="list-value font-weight-bold"> @book.PublishDate</a></li>
+
+                                    <li>Sayfa Sayısı: <span class="list-value"> @book.PageCount</span></li>
+                                    <li>Boyut: <span class="list-value"> @book.Size</span></li>
+                                </ul>
+                                <div class="price-block">
+                                    <span class="price">₺ @SeoHelper.ShowPrice(book.DiscountPrice, 2)</span>
+                                    <del class="price-old">₺ @SeoHelper.ShowPrice(book.Price, 2)</del>
+                                </div>
+                                <div class="rating-widget">
+                                    <div class="rating-block">
+                                        <span class="fas fa-star star_on"></span>
+                                        <span class="fas fa-star star_on"></span>
+                                        <span class="fas fa-star star_on"></span>
+                                        <span class="fas fa-star star_on"></span>
+                                        <span class="fas fa-star "></span>
+                                    </div>
+
+                                </div>
+                                <div class="content" id="contentheight">
+                                    <p>
+                                        @book.Content
+                                    </p>
+                                </div>
+                                <div class="devaminioku">
+                                    <div class="devamyazi btn">DEVAMINI OKU</div>
+                                </div>
+                                <div class="add-to-cart-row">
+                                    <div class="count-input-block">
+                                        <span class="widget-label">Adet</span>
+                                        <input type="number" class="form-control text-center" value="1" id="count">
+                                    </div>
+                                    <div class="add-cart-btn">
+                                        <button onclick="AddtoCartBookDetail(this)" itemscope itemid="@book.Id" class="btn btn-outlined--primary">
+                                            <span class="plus-icon">+</span>Sepete Ekle
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script type="text/javascript">
+    function DeleteItem(item) {
+        var CartContentId = $(item).attr("itemid");
+        $.ajax({
+            async: true,
+            type: "POST",
+            contentType: false,
+            processData: false,
+            data: CartContentId,
+            dataType: 'json',
+            url: '/Sepeticeriksil/?CartContentId=' + CartContentId,
+            success: function (data) {
+                $('#row1_' + CartContentId).remove();
+                $("#CartDetail").load(location.href + " #CartDetail");
+                $('#row_' + CartContentId).remove();
+                $("#TotalPrice").load(location.href + " #TotalPrice");
+            },
+            error: function () {
+                alert("Error Occurred!");
+            }
+        });
+    }
+</script>
+
+<script>
+    function AddtoCart(item) {
+        var bookid = $(item).attr("itemid");
+        $.ajax({
+            async: true,
+            type: "POST",
+            contentType: false,
+            processData: false,
+            data: bookid,
+            dataType: 'json',
+            url: '/SepeteEkle/?bookid=' + bookid,
+            success: function (data) {
+                $("#CartDetail").load(location.href + " #CartDetail");
+                $("#CartItem").load(location.href + " #CartItem");
+            }
+        })
+    }
+
+</script>
+
+<script>
+    function AddToCompare(item) {
+        BookId = $(item).attr("itemid");
+
+        $.ajax({
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: BookId,
+            url: '/AddToCompare/?BookId=' + BookId,
+            success: function (response) {
+                if (response == "Giriş yap") {
+                    alert(" Karşılaştırma listesine eklemek için oturum açın ya da  yeni hesap oluşturun!");
+                }
+                else if (response == "Eklendi") {
+                    alert("Karşılaştırma listesine eklendi.");
+                }
+
+                else if (response == "En fazla 2 kitap eklenebilir!") {
+                    alert("En fazla 2 kitap eklenebilir!");
+                }
+
+                else if (response == "Bu kitap listede var!") {
+                    alert("Bu kitap listede var!");
+                }
+
+
+            },
+            error: function (er) {
+                alert("Hata Oluştu!");
+            }
+        });
+    }
+</script>
+
+<script>
+    function AddtoFavourite(item) {
+        BookId = $(item).attr("itemid");
+        UserId = $("#UserId").val();
+        if (UserId == "") {
+            alert(" Favoriler listesine eklemek için oturum açın ya da  yeni hesap oluşturun!");
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: BookId,
+                url: '/favorilereekle/?BookId=' + BookId + '&UserId=' + UserId,
+                success: function (response) {
+                    $("#_book" + BookId).html(response);
+                    alert("Favorilere eklendi.");
+                },
+                error: function (er) {
+                    alert("Hata Oluştu!");
+                }
+            });
+
+        }
+
+    }
+</script>
+
+<script>
+    function DeletetoFavourite(item) {
+        BookId = $(item).attr("itemid");
+        UserId = $("#UserId").val();
+        if (UserId == "") {
+            alert(" Favoriler listesine eklemek için oturum açın ya da  yeni hesap oluşturun!");
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: BookId,
+                url: '/DeletetoFavourite/?BookId=' + BookId + '&UserId=' + UserId,
+                success: function (response) {
+                    $("#_book" + BookId).html(response);
+                    alert("Favorilerden silindi.");
+                },
+                error: function (er) {
+                    alert("Hata Oluştu!");
+                }
+            });
+
+        }
+
+    }
+</script>
+
+<script>
+    function AddtoFavouriteCat_Detail(item) {
+        BookId = $(item).attr("itemid");
+        UserId = $("#UserId").val();
+        if (UserId == "") {
+            $("#alertuserfav").show();
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: BookId,
+                url: '/AddtoFavouriteCat_Detail/?BookId=' + BookId + '&UserId=' + UserId,
+                success: function (response) {
+                    $("#book" + BookId).html(response);
+                    alert("Favorilere eklendi.");
+                },
+                error: function (er) {
+                    alert("Hata Oluştu!");
+                }
+            });
+
+        }
+
+    }
+</script>
+
+<script>
+    function DeletetoFavouriteCat_Detail(item) {
+        BookId = $(item).attr("itemid");
+        UserId = $("#UserId").val();
+        if (UserId == "") {
+            alert(" Favoriler listesine eklemek için oturum açın ya da  yeni hesap oluşturun!");
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: BookId,
+                url: '/DeletetoFavouriteCat_Detail/?BookId=' + BookId + '&UserId=' + UserId,
+                success: function (response) {
+                    $("#book" + BookId).html(response);
+                    alert("Favorilerden silindi.");
+                },
+                error: function (er) {
+                    alert("Hata Oluştu!");
+                }
+            });
+
+        }
+
+    }
+</script>
+
+<script type="text/javascript">
+    function AddtoCartBookDetail(item) {
+        var bookid = $(item).attr("itemid");
+        var count = $("#count").val();
+        $.ajax({
+            async: true,
+            type: "POST",
+            contentType: false,
+            processData: false,
+            data: bookid,
+            dataType: 'json',
+            url: '/sepeteEkleKitap-Detay/?bookid=' + bookid + "&count=" + count,
+            success: function (data) {
+                $("#CartDetail").load(location.href + " #CartDetail");
+                $("#CartItem").load(location.href + " #CartItem");
+                alert("Sepete Eklendi.")
+
+            },
+            error: function () {
+                alert("Error Occurred!");
+            }
+        });
+    }
+</script>
+
+<script>
+    function AddtoFavouriteBookDetail(item) {
+        BookId = $(item).attr("itemid");
+        UserId = $("#UserId").val();
+        if (UserId == "") {
+            alert(" Favoriler listesine eklemek için oturum açın ya da  yeni hesap oluşturun!");
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: BookId,
+                url: '/kitap-detayfavorilereekle/?BookId=' + BookId + '&UserId=' + UserId,
+                success: function (response) {
+                    $("#_book" + BookId).html(response);
+                    alert("Favorilere eklendi.");
+                },
+                error: function (er) {
+                    alert("Hata Oluştu!");
+                }
+            });
+
+        }
+
+    }
+</script>
+
+<script>
+    function DeletetoFavouriteBookDetail(item) {
+        BookId = $(item).attr("itemid");
+        UserId = $("#UserId").val();
+        if (UserId == "") {
+            alert(" Favoriler listesine eklemek için oturum açın ya da  yeni hesap oluşturun!");
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: BookId,
+                url: '/kitap-detayfavorisil/?BookId=' + BookId + '&UserId=' + UserId,
+                success: function (response) {
+                    $("#_book" + BookId).html(response);
+                    alert("Favorilerden silindi.");
+                },
+                error: function (er) {
+                    alert("Hata Oluştu!");
+                }
+            });
+
+        }
+
+    }
+</script>
+
+@*<script src="https://code.jquery.com/jquery-3.5.0.js"></script>*@
+<style>
+    .content {
+        height: 70px;
+        overflow: hidden;
+    }
+
+    .devamyazi {
+        cursor: pointer;
+    }
+</style>
+<script>
+    jQuery(function ($) {
+        height = $("#contentheight").height();
+        if (height < 70) {
+            $('.devamyazi').style.display = 'none';
+        }
+
+    }
+    );
+</script>
+<script>
+    jQuery(function ($) {
+        //ANA SAYFA DEVAMINI OKU
+        $('.devamyazi').on('click', function () {
+
+            if ($(this).hasClass('aktif')) {
+                $('.content').css({ 'height': '70px' });
+                $(this).removeClass('aktif');
+            } else {
+                $('.content').css({ 'height': 'auto' });
+                $(this).addClass('aktif');
+            }
+
+        });
+        //ANA SAYFA DEVAMINI OKU
+    })
+</script>

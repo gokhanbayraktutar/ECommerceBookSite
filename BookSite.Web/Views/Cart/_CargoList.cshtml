@@ -1,0 +1,11 @@
+﻿@model BookSite.Data.Entities.Cargo
+@using BookSite.Web.Methods
+
+
+<div id="CargoPrice">
+    <p >Kargo Ücreti <span>@SeoHelper.ShowPrice(Convert.ToDouble(Model.Price), 2) ₺</span></p>
+
+    <h4>Toplam Ödenecek Tutar <span>@ViewBag.TotalPaymentPrice ₺</span></h4>
+</div>
+
+

@@ -1,0 +1,278 @@
+﻿@model BookSite.Web.Models.HomeVM
+@using BookSite.Web.Methods
+@using BookSite.Data.Entities
+@{
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var siteConstant = db.SiteConstants.FirstOrDefault();
+
+    string pageHeader = "Karşılaştırma Listesi";
+
+    ViewBag.Title = SeoHelper.HeaderWriter(siteConstant.Header, pageHeader);
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    Book book1 = null;
+    Book book2 = null;
+
+    Book_Picture book1picture = null;
+    Book_Picture book2picture = null;
+
+    Book_Author author1 = null;
+    Book_Author author2 = null;
+    try
+    {
+        if (Model.CompareBooks != null)
+        {
+            book1 = Model.CompareBooks.FirstOrDefault();
+
+            book1picture = db.Book_Pictures.FirstOrDefault(x => x.BookId == book1.Id);
+
+            author1 = db.Book_Authors.FirstOrDefault(x => x.BookId == book1.Id);
+
+            if (Model.CompareBooks.Count > 1)
+            {
+                book2 = Model.CompareBooks.Skip(1).Take(1).FirstOrDefault();
+
+                book2picture = db.Book_Pictures.FirstOrDefault(x => x.BookId == book2.Id);
+
+                author2 = db.Book_Authors.FirstOrDefault(x => x.BookId == book2.Id);
+            }
+        }
+
+    }
+    catch (Exception)
+    {
+
+    }
+
+
+}
+<section class="breadcrumb-section">
+    <h2 class="sr-only">Site Breadcrumb</h2>
+    <div class="container">
+        <div class="breadcrumb-contents">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">AnaSayfa</a></li>
+                    <li class="breadcrumb-item active">
+                        Karşılaştırma listesi
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+
+
+<main class="compare_area inner-page-sec-padding-bottom">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <form action="#">
+                    <!-- Compare Table -->
+                    @if (book1 == null && book2 == null)
+                    {
+                        
+                        <h5>Karşılaştırma listesi için kitap ekleyiniz.</h5>
+                    }
+                    @if (book1 != null || book2 != null)
+                    {
+                        <div class="compare-table table-responsive">
+                            <table class="table mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="first-column">Kitap</td>
+                                        @if (book1 != null)
+                                        {
+                                            <td class="product-image-title">
+                                                <a href="#" class="image">
+                                                    <img src="~/Upload/Image/@book1picture.Picture"
+                                                         alt="Compare Product" width="400">
+                                                </a>
+                                        
+                                                    <a href="#"  style="text-align:center">@book1.Name</a><br />
+                                                    <a href="#"  style="text-align:center">@author1.Author.Name</a>
+                                               
+                                               
+                                            </td>
+                                        }
+                                        @if (book2 != null)
+                                        {
+                                            <td class="product-image-title">
+                                                <a href="#" class="image">
+                                                    <img src="~/Upload/Image/@book2picture.Picture"
+                                                         alt="Compare Product" width="400">
+                                                </a>
+                                                <a href="#" >@book2.Name</a><br />
+                                                <a href="#" >@author2.Author.Name</a>
+                                            </td>
+                                        }
+
+                                    </tr>
+                                    <tr>
+
+                                        <td class="first-column">Açıklama</td>
+                                        @if (book1 != null)
+                                        {
+                                            <td class="pro-desc">
+                                                <p class="content1">
+                                                    @book1.Content
+                                                </p>
+                                                <div class="devaminioku">
+                                                    <div class="devamyazi1 btn">DEVAMINI OKU</div>
+                                                </div>
+                                            </td>
+                                        }
+                                        @if (book2 != null)
+                                        {
+                                            <td class="pro-desc">
+                                                <p class="content2">
+                                                    @book2.Content
+                                                </p>
+                                                <div class="devaminioku">
+                                                    <div class="devamyazi2 btn">DEVAMINI OKU</div>
+                                                </div>
+                                            </td>
+                                        }
+
+                                    </tr>
+
+                                    <tr>
+                                        <td class="first-column">Fiyat</td>
+                                        @if (book1 != null)
+                                        {
+                                            <td class="pro-price">@SeoHelper.ShowPrice(book1.DiscountPrice, 2) ₺</td>
+                                        }
+                                        @if (book2 != null)
+                                        {
+                                            <td class="pro-price">@SeoHelper.ShowPrice(book2.DiscountPrice, 2) ₺</td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <td class="first-column">Sepete Ekle</td>
+                                        @if (book1 != null)
+                                        {
+                                    <td class="pro-addtocart">
+                                       
+                                        <button class="single-btn" onclick="AddtoCart(this)" itemscope itemid="@book1.Id" style=" color: #62ab00;">
+                                            <i class="fas fa-shopping-cart"></i><span>Sepete Ekle</span>
+                                        </button>
+                                    </td>
+                                        }
+                                        @if (book2 != null)
+                                        {
+                                            <td class="pro-addtocart">
+                                                <button class="single-btn" onclick="AddtoCart(this)" itemscope itemid="@book2.Id"style=" color: #62ab00;" >
+                                                    <i class="fas fa-shopping-cart"></i><span>Sepete Ekle</span>
+                                                </button>
+                                            </td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <td class="first-column">Sil</td>
+                                        @if (book1 != null)
+                                        {
+                                            <td class="pro-remove"><a href="/DeletetoCompare/@book1.Id"><i class="fas fa-trash"></i></a></td>
+                                        }
+                                        @if (book2 != null)
+                                        {
+                                            <td class="pro-remove"><a href="/DeletetoCompare/@book2.Id"><i class="fas fa-trash"></i></a></td>
+                                        }
+                                    </tr>
+
+                                    <tr>
+                                        <td class="first-column">Derecelendir</td>
+                                        @if (book1 != null)
+                                        {
+                                            <td class="pro-ratting">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star-o"></i>
+                                            </td>
+                                        }
+                                        @if (book2 != null)
+                                        {
+                                            <td class="pro-ratting">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </td>
+                                        }
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- Compare Page End -->
+
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+<style>
+    .content1 {
+        height: 100px;
+        overflow: hidden;
+    }
+
+    .devamyazi1 {
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    jQuery(function ($) {
+        //ANA SAYFA DEVAMINI OKU
+        $('.devamyazi1').on('click', function () {
+
+            if ($(this).hasClass('aktif')) {
+                $('.content1').css({ 'height': '100px' });
+                $(this).removeClass('aktif');
+            } else {
+                $('.content1').css({ 'height': 'auto' });
+                $(this).addClass('aktif');
+            }
+
+        });
+        //ANA SAYFA DEVAMINI OKU
+    })
+</script>
+
+<style>
+    .content2 {
+        height: 100px;
+        overflow: hidden;
+    }
+
+    .devamyazi2 {
+        cursor: pointer;
+    }
+</style>
+
+
+<script>
+    jQuery(function ($) {
+        //ANA SAYFA DEVAMINI OKU
+        $('.devamyazi2').on('click', function () {
+
+            if ($(this).hasClass('aktif')) {
+                $('.content2').css({ 'height': '100px' });
+                $(this).removeClass('aktif');
+            } else {
+                $('.content2').css({ 'height': 'auto' });
+                $(this).addClass('aktif');
+            }
+
+        });
+        //ANA SAYFA DEVAMINI OKU
+    })
+</script>

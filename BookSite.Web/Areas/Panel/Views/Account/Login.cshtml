@@ -1,0 +1,104 @@
+﻿@model BookSite.Data.Entities.Admin
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>BookSite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
+    <meta content="Coderthemes" name="author" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    @Html.Partial("_StylesPartial")
+
+
+</head>
+
+<body class="loading authentication-bg authentication-bg-pattern">
+
+    <div class="account-pages mt-5 mb-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-4">
+                    <div class="card bg-pattern">
+
+                        <div class="card-body p-4">
+
+                            <div class="text-center w-75 m-auto">
+                                <div class="auth-logo">
+                                    <a href="index.html" class="logo logo-dark text-center">
+                                        <span class="logo-lg">
+                                            <img src="../assets/images/logo-dark.png" alt="" height="22">
+                                        </span>
+                                    </a>
+
+                                    <a href="index.html" class="logo logo-light text-center">
+                                        <span class="logo-lg">
+                                            <img src="../assets/images/logo-light.png" alt="" height="22">
+                                        </span>
+                                    </a>
+                                </div>
+                                <h2 class="text-muted mb-4 mt-3">Giriş</h2>
+                            </div>
+
+                            <form action="/Panel/Account/Login" enctype="multipart/form-data" role="form" method="post">
+
+                                <div class="mb-3">
+                                    <label class="form-label">Kullanıcı Adı</label>
+                                    <input class="form-control" type="text" name="UserName" required placeholder="Kullanıcı adınızı giriniz">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Şifre</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="password" id="password" class="form-control" name="password" required placeholder="Şifrenizi giriniz">
+                                        @*<div class="input-group-text" data-password="false">
+                    <span class="password-eye"></span>
+                </div>*@
+                                    </div>
+                                </div>
+
+
+                                @if (ViewBag.Error != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        @ViewBag.Error
+                                    </div>
+                                }
+                                @*localhost*@
+                                <div class="g-recaptcha" data-sitekey="6LcBa68cAAAAAH7BzVFwUqRFBlSBlUapksr59TFH" style="margin-left: 18px;"></div>
+
+                                @*WebSite*@
+                                @*<div class="g-recaptcha" data-sitekey="6Le7xDMdAAAAAIF1DxQIUteOlFVKJaOagRACLy0y" style="margin-left: 18px;"></div>*@
+
+                                <div class="text-center d-grid">
+                                    <br />
+                                    <button class="btn btn-primary" type="submit"> Giriş</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- end card -->
+
+                </div> <!-- end col -->
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- end container -->
+    </div>
+    <!-- end page -->
+
+
+    <footer class="footer footer-alt">
+        2021 -
+        <a href="" class="text-white-50">GB</a>
+    </footer>
+
+    @Html.Partial("_ScriptsPartial")
+
+</body>
+</html>

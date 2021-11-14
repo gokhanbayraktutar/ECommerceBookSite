@@ -1,0 +1,88 @@
+﻿@model BookSite.Data.Entities.Cart
+@using BookSite.Web.Methods
+@{
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+    var siteConstant = db.SiteConstants.FirstOrDefault();
+    ViewBag.Title = BookSite.Web.Methods.SeoHelper.HeaderWriter(siteConstant.Header,"Başarılı");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var CartContents = db.CartContents.Where(x => x.CartId == Model.Id).ToList();
+    var paymentID = Convert.ToInt32(Model.PaymentType);
+}
+
+<section class="breadcrumb-section">
+    <h2 class="sr-only">Site Breadcrumb</h2>
+    <div class="container">
+        <div class="breadcrumb-contents">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Anasayfa</a></li>
+                    <li class="breadcrumb-item active">Sipariş Tamamlandı</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+
+<section class="order-complete inner-page-sec-padding-bottom">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="order-complete-message text-center">
+                    <h1>Teşekkürler !</h1>
+                    <p>Siparişiniz Alındı.</p>
+                </div>
+                <ul class="order-details-list">
+                    <li>Sipariş No: <strong>@Model.OrderNo</strong></li>
+                    <li>Tarih: <strong>@Model.OrderDate.ToShortDateString()</strong></li>
+                    <li>Tutar: <strong>@BookSite.Web.Methods.SeoHelper.ShowPrice(Convert.ToDouble(Model.TotalPaymentPrice),2) ₺</strong></li>
+                    <li>Ödeme Şekli: <strong>@db.PaymentTypes.FirstOrDefault(x=>x.Id==paymentID ).Header</strong></li>
+                </ul>
+                <center><h3 class="order-table-title">Sipariş Detayı</h3></center>
+                <div class="table-responsive">
+                    <div class="cart-table table-responsive mb--40" id="carttbl">
+                        <table class="table">
+                            <!-- Head Row -->
+                            <thead>
+                                <tr>
+                                    <th class="pro-thumbnail">Kitap-Resim</th>
+                                    <th class="pro-title">Kitap Adı</th>
+                                    <th class="pro-price">Birim Fiyat</th>
+                                    <th class="pro-quantity">Adet</th>
+                                    <th class="pro-subtotal">Toplam Fiyat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in CartContents)
+                                {
+                                    var book = db.Books.FirstOrDefault(x => x.Id == item.BookId);
+                                    var picture = db.Book_Pictures.FirstOrDefault(x => x.BookId == item.BookId).Picture;
+
+                                    <tr id="row_@item.Id">
+                                       
+                                        <td class="pro-thumbnail">
+                                            <a href="~/Upload/Image/@picture">
+                                                <img src="~/Upload/Image/@picture" alt="Product">
+                                            </a>
+                                        </td>
+                                        <td class="pro-title"><a href="#">@book.Name</a></td>
+                                        <td class="pro-price"><span>@SeoHelper.ShowPrice(Convert.ToDouble(item.Price), 2) ₺</span></td>
+                                        <td class="pro-quantity" id="qty_@item.Id">
+                                            <div class="pro-qty">
+                                                <div class="count-input-block">
+                                                  @item.Count
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="pro-subtotal"><span>@SeoHelper.ShowPrice(Convert.ToDouble(item.TotalPrice), 2) ₺</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

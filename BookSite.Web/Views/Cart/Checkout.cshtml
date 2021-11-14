@@ -1,0 +1,260 @@
+﻿@model BookSite.Web.Models.HomeVM
+@using BookSite.Web.Methods
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+    var siteConstant = db.SiteConstants.FirstOrDefault();
+    string pageHeader = "Ödeme İşlemleri ";
+    ViewBag.Title = SeoHelper.HeaderWriter(siteConstant.Header, pageHeader);
+
+}
+
+<section class="breadcrumb-section">
+    <h2 class="sr-only">Site Breadcrumb</h2>
+    <div class="container">
+        <div class="breadcrumb-contents">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/sepetim">Sepetim</a></li>
+                    <li class="breadcrumb-item active">Ödeme İşlemleri</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<main id="content" class="page-section inner-page-sec-padding-bottom space-db--20">
+    <div class="container">
+        @if (TempData["error"] != null)
+        {
+            <div class="alert alert-danger" role="alert" style="width:600px">
+                @TempData["error"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+        }
+        <div class="row">
+            <div class="col-12">
+                <!-- Checkout Form s-->
+                <div class="checkout-form">
+                    <form method="post" role="form" enctype="multipart/form-data" action="/siparisver">
+                        <div class="row row-40">
+                            <div class="col-12">
+                                <h3 class="quick-title">Ödeme İşlemleri</h3>
+                            </div>
+                            <div class="col-lg-7 mb--20">
+                                <!-- Billing Address -->
+                                <div id="billing-form" class="mb-40">
+
+                                    <div class="row">
+                                        <div class="col-md-12 col-12 mb--20">
+                                            <label>Ad:</label>
+                                            <label>@Model.User.Name</label>
+                                        </div>
+                                        <div class="col-md-12 col-12 mb--20">
+                                            <label>Soyad:</label>
+                                            <label>@Model.User.Lastname</label>
+                                        </div>
+
+                                        <div class="col-md-12 col-12 mb--20">
+                                            <label>Email:</label>
+                                            <label>@Model.User.Email</label>
+                                        </div>
+                                        <div class="col-md-6 col-12 mb--20">
+                                            <label>Telefon*</label>
+                                            <input type="text" placeholder="Telefon" value="@Model.User.Phone" name="PhoneNumber">
+                                        </div>
+
+                                        <div class="col-md-6 col-12 mb--20">
+                                            <label>İl*</label>
+                                            <select class="form-control" name="City" onchange="ChangeCity(this)" id="City">
+                                                <option>Seçiniz</option>
+                                                @foreach (var city in Model.Cities)
+                                                {
+                                                    <option value="@city.Id">@city.Name</option>
+                                                }
+
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 col-12 mb--20">
+                                            <label>İlçe*</label>
+                                            <select class="form-control" id="District" name="District">
+                                                <option>Seçiniz</option>
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+                                        <div class="order-note-block mt--30">
+                                            <label for="order-note">Teslimat Adresi</label>
+                                            <textarea id="order-note" cols="60" rows="10" class="order-note"
+                                                      name="DeliveryAdress" placeholder="Adres"></textarea>
+                                        </div>
+
+                                        <div class="col-md-6 col-12 mb--20">
+                                            <label>Kargo *</label>
+                                            <select class="form-control" name="CargoId" onchange="ChangeCargo(this)" id="Cargo">
+                                                <option value="0">Seçiniz</option>
+                                                @foreach (var cargo in Model.Cargos)
+                                                {
+                                                    <option value="@cargo.Id">@cargo.CompanyName - @cargo.Price ₺</option>
+                                                }
+
+                                            </select>
+                                        </div>
+
+
+                                        <div class="col-md-6 col-12 mb--20" style="display:none" id="pym">
+                                            <label>Ödeme Tipi*</label>
+                                            <select class="form-control" name="PaymentType" onchange="ChangePaymentType(this)" id="PaymentType">
+                                                @foreach (var type in Model.PaymentTypes.OrderByDescending(x=>x.Id))
+                                                {
+                                                    <option value="@type.Id">@type.Header</option>
+                                                }
+
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="order-note-block mt--30">
+                                        <label for="order-note">Sipariş Notu</label>
+                                        <textarea id="order-note" cols="30" rows="10" class="order-note" name="OrderNote"
+                                                  placeholder="Sipariş Notu"></textarea>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="row">
+                                    <!-- Cart Total -->
+                                    <div class="col-12">
+                                        <div class="checkout-cart-total">
+                                            <h2 class="checkout-title">Sipariş Özeti</h2>
+                                            <h4>Ürünler <span>Toplam</span></h4>
+                                            <ul>
+                                                @foreach (var cartContent in Model.CartContents)
+
+                                                {
+                                                    var book = db.Books.FirstOrDefault(x => x.Id == cartContent.BookId);
+                                                    <li>
+                                                        <span class="left">@book.Name x @cartContent.Count</span> <span class="right">@SeoHelper.ShowPrice(Convert.ToDouble(cartContent.Price), 2) ₺</span>
+                                                    </li>
+                                                }
+
+                                            </ul>
+                                            <p>Ara Toplam <span>@SeoHelper.ShowPrice(Convert.ToDouble(Model.Cart.TotalPrice), 2) ₺</span></p>
+                                            <input type="text" value="@Model.Cart.TotalPrice" id="TotalPrice" hidden />
+                                            <div id="CargoPrice">
+                                                <p>Kargo Ücreti <span>0,00 ₺</span></p>
+                                                <h4>Toplam Ödenecek Tutar <span>@SeoHelper.ShowPrice(Convert.ToDouble(Model.Cart.TotalPrice), 2) ₺</span></h4>
+                                            </div>
+
+                                            <div class="method-notice mt--25">
+                                                @*<article>
+                                                    <h3 class="d-none sr-only">blog-article</h3>
+                                                    Sorry, it seems that there are no available payment methods for
+                                                    your state. Please contact us if you
+                                                    require
+                                                    assistance
+                                                    or wish to make alternate arrangements.
+                                                </article>*@
+                                            </div>
+                                            <div class="term-block">
+                                                <input type="checkbox" id="accept_terms2" name="agree" value="true">
+                                                <label for="accept_terms2">
+                                                    Şartları okudum kabul ediyorum.
+                                                </label>
+                                            </div>
+                                            <input hidden name="Id" value="@Model.Cart.Id" />
+
+                                        
+                                            <div id="Orderbtn">
+                                                <button type="submit" class="place-order w-100">Sipariş Ver</button>
+                                            </div>
+                                           
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script type="text/javascript">
+    function ChangeCity() {
+        var cityId = $("#City").val();
+        $.ajax({
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: cityId,
+            url: '/ilceGetir/?cityId=' + cityId,
+            success: function (response) {
+                $("#District").html(response);
+            },
+            error: function (er) {
+                alert("Hata Oluştu!");
+            }
+        });
+    }
+</script>
+
+
+<script>
+    function ChangePaymentType() {
+        var paymenttypeId = $("#PaymentType").val();
+        $.ajax({
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: paymenttypeId,
+            url: '/PaymentType/?paymenttypeId=' + paymenttypeId,
+            success: function (response) {
+                $("#Orderbtn").html(response);
+            },
+            error: function (er) {
+                alert("Hata Oluştu!");
+            }
+        });
+    }
+
+
+
+</script>
+
+
+
+
+
+<script>
+    function ChangeCargo() {
+
+        var cargoId = $("#Cargo").val();
+        var totalPrice = $("#TotalPrice").val();
+
+        $.ajax({
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: cargoId,
+            url: '/kargoGetir/?cargoId=' + cargoId + '&totalPrice=' + totalPrice,
+            success: function (response) {
+                $("#CargoPrice").html(response);
+                document.getElementById("pym").style.display = "";
+            },
+            error: function (er) {
+                alert("Hata Oluştu!");
+            }
+        });
+
+    }
+</script>

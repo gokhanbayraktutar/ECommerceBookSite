@@ -1,0 +1,101 @@
+﻿@model BookSite.Data.Entities.Admin
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Admin/Index">Kullanıcılar</a></li>
+                    <li class="breadcrumb-item active">Kullanıcı Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kullanıcı Bilgileri Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Kullanıcı Adı*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtUsername" value="@Model.UserName">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Şifre*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="password" id="txtPsw" class="form-control" value="@Model.Password">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Email*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="Email" class="form-control" value="@Model.Email">
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Admin/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function Edit(item) {
+        var id = $(item).attr("itemid");
+        var username = $("#txtUsername").val();
+        var password = $("#txtPsw").val();
+        var email = $("#Email").val();
+
+        if (username == "" || password == "" || email == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Kulanıcı adı, Email, Şifre boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                async: true,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: id,
+                dataType: 'json',
+                url: '/Panel/Admin/Edit?id=' + id + '&username=' + username + '&password=' + password + '&email=' + email,
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                         'Düzenlendi.',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/Admin/Index')
+                    })
+                },
+
+                error: function () {
+
+                    swal.fire({
+                        title: "Başarısız!",
+                        text: "Düzenlenemedi!",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+        }
+</script>

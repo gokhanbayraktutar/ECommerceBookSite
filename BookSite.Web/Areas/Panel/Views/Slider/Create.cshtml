@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Book/Index">Slayt</a></li>
+                    <li class="breadcrumb-item active">Slayt  Ekle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Slayt Bilgileri Ekleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Başlık</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="Header" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">İçerik</label>
+                    <div class="col-8 col-xl-9">
+                        <textarea type="text" id="txtContent" style="height:200px" class="form-control"></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Resim </label>
+                    <div class="col-xl-6">
+                        <div class="mb-3 mb-xl-0">
+                            <input class="form-control" type="file" id="ImageFile">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Sıralama</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="Sorting" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Aktiflik</label>
+                    <div class="col-8 col-xl-9">
+                        <div class="form-check mb-2 form-check-blue">
+                            <input class="form-check-input" type="checkbox" id="Active" checked="" >
+                            <label class="form-check-label" for="customckeck7"> Aktif mi?</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Create(this)" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Slider/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+
+<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+    function Create(item) {
+        var data = new FormData();
+        var Header = $("#Header").val();
+        var Content = $("#txtContent").val();
+        var Sorting = $("#Sorting").val();
+        var Active = $("#Active").is(':checked');
+        data.append("Header", Header);
+        data.append("Content", Content);
+        data.append("Sorting", Sorting);
+        data.append("Active", Active);
+        var files = $("#ImageFile").get(0).files;
+        if (files.length > 0) {
+            data.append("ImageFile", files[0]);
+        }
+
+
+        if (Header == "" || files.length == 0 || Sorting == null ) {
+            Swal.fire(
+                'Başarısız!',
+                'Başlık , Resim, ve sıralama  boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: data,
+                url: "/Panel/Slider/CreateSlider",
+                success: function (response) {
+                    if (response == 0) {
+                        Swal.fire(
+                            'Başarılı!',
+                            'Slayt  eklendi.',
+                            'success'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/Slider/Index')
+                        })
+                    } else {
+                        Swal.fire(
+                            'Hata!',
+                            'Resim formatında dosya seçiniz!',
+                            'error'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/Slider/CreateSlider')
+                        })
+                    }
+
+                },
+
+                error: function (data) {
+
+                    swal.fire({
+                        title: "Başarısız",
+                        text: "Eklenemedi.",
+                        icon: "error"
+                    }).then(function () {
+                        location.reload();
+                    })
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,104 @@
+﻿@model BookSite.Data.Entities.Book_Stock
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var book = db.Books.FirstOrDefault(x => x.Id == Model.BookId).Name;
+
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Book_Stock/Index">Kitap-Stok</a></li>
+                    <li class="breadcrumb-item active">Kitap-Stok Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kitap-Stok Bilgileri Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Kitap Adı</label>
+                    <div class="col-8 col-xl-9">
+                        <label  class="col-8  col-form-label">@book</label>
+                        <input type="text" id="txtBookname" hidden value="@Model.BookId" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Stok </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="Stock" value="@Model.StockCount"> 
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Book_Stock/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+
+
+<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+
+<script>
+    function Edit(item) {
+        var Id = $(item).attr("itemid");
+        var stock = $("#Stock").val();
+
+        if ( stock == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Stok  boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                async: true,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: Id,
+                dataType: 'json',
+                url: '/Panel/Book_Stock/Edit?Id=' + Id + '&stock=' + stock,
+                success: function (data) {
+                        Swal.fire(
+                            'Başarılı!',
+                            'Kitap-Stok düzenlendi.',
+                            'success'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/Book_Stock/Index')
+                        })
+                },
+                error: function () {
+
+                    swal.fire({
+                        title: "Başarısız!",
+                        text: "Düzenlenemedi!",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    }
+</script>
+

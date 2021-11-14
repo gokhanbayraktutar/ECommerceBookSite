@@ -1,0 +1,60 @@
+﻿@model BookSite.Web.Models.HomeVM
+@using BookSite.Web.Methods
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+
+    var siteConstant = db.SiteConstants.FirstOrDefault();
+    string pageHeader = "Kategoriler";
+    ViewBag.Title = SeoHelper.HeaderWriter(siteConstant.Header, pageHeader);
+
+}
+
+<section class="breadcrumb-section">
+    <h2 class="sr-only">Site Breadcrumb</h2>
+    <div class="container">
+        <div class="breadcrumb-contents">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">AnaSayfa</a></li>
+                    <li class="breadcrumb-item active">Kategoriler</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+
+<section class="mb--30 ">
+    <div class="container">
+        <center>
+            <div class="section-title mt-0">
+                <h2>
+                    Kategoriler
+                </h2>
+            </div>
+        </center>
+        <div class="row">
+            @foreach (var cat in Model.Categories)
+            {
+
+                <div class="col-xl-4 col-md-6 mt--30">
+                    <div class="feature-box h-300">
+                        <div class="icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="text">
+                            <a href="/kategorikitap/@cat.Id">
+                                <h5>@cat.Name</h5>
+                                <p> Kitap Sayısı: @db.Book_Categories.Where(x => x.CategoryId == cat.Id).Select(x => x.BookId).Distinct().ToList().Count</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

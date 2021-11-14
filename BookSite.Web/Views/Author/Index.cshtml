@@ -1,0 +1,65 @@
+﻿@model BookSite.Web.Models.HomeVM
+@using BookSite.Web.Methods
+@using PagedList
+@using PagedList.Mvc
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var siteConstant = db.SiteConstants.FirstOrDefault();
+    string pageHeader = "Yazarlar";
+    ViewBag.Title = SeoHelper.HeaderWriter(siteConstant.Header, pageHeader);
+}
+
+<section class="breadcrumb-section">
+    <h2 class="sr-only">Site Breadcrumb</h2>
+    <div class="container">
+        <div class="breadcrumb-contents">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">AnaSayfa</a></li>
+                    <li class="breadcrumb-item active">Yazarlar</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+<section class="mb--30 ">
+    <div class="container">
+        <center>
+            <div class="section-title mt-0">
+                <h2>
+                    Yazarlar
+                </h2>
+            </div>
+        </center>
+        <div class="row">
+            @foreach (var author in Model.PagedListAuthors)
+            {
+
+                <div class="col-xl-4 col-md-6 mt--30">
+                    <div class="feature-box h-300">
+                        <div class="icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="text">
+                            <a href="/yazarkitap/@author.Id">
+                                <h5>@author.Name</h5>
+                                <p> Kitap Sayısı: @db.Book_Authors.Where(x => x.AuthorId == author.Id).Select(x => x.BookId).Distinct().ToList().Count</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div>
+            <center>
+                @Html.PagedListPager(Model.PagedListAuthors, pg => "/yazarlarsayfa/" + pg, new PagedListRenderOptions { DisplayLinkToFirstPage = PagedListDisplayMode.Always, DisplayLinkToLastPage = PagedListDisplayMode.Always })
+            </center>
+        </div>
+    </div>
+</section>
+
+<link href="~/Content/PagedList.css" rel="stylesheet" />

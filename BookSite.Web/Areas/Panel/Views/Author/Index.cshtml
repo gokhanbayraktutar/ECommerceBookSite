@@ -1,0 +1,154 @@
+﻿@model IPagedList<BookSite.Data.Entities.Author>
+@using PagedList
+@using PagedList.Mvc
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    int authorscount = db.Authors.ToList().Count;
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item active">Yazarlar</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Yazarlar</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+
+    <div class="row">
+        <div class="col-lg-6 col-xl-3">
+            <div class="card bg-pattern">
+                <div class="card-body" style="background-color: #f7b84b">
+                    <div class="p-2 text-center" style="font-size: 2rem;">
+                        <i class="fas fa-user-friends"></i>
+                        <h3><span data-plugin="counterup">@authorscount</span></h3>
+                        <p class="text-muted font-15 mb-0">Yazar Sayısı</p>
+                    </div>
+                </div>
+            </div> <!-- end card-->
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+  
+        <div class="card-body">
+            <div class="row justify-content-between">
+                <div class="col-auto">
+                    <form class="d-flex flex-wrap align-items-center" enctype="multipart/form-data" role="form" action="/Panel/Author/Search" method="post">
+                        <label for="inputPassword2" class="visually-hidden">Search</label>
+                        <div class="me-3">
+                            <input type="search" class="form-control my-1 my-md-0" id="inputPassword2" name="search" placeholder="Yazar Adı...">
+
+                        </div>
+                        <button type="submit" class="btn btn-primary waves-effect waves-light" style="margin-left:-10px;">Ara</button>
+                    </form>
+                </div>
+            </div> <!-- end row -->
+        </div> <!-- end card-body-->
+   <!-- end card-->
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-sm-4">
+                        <a href="/Panel/Author/Create" class="btn btn-info mb-2"><i class="mdi mdi-plus-circle me-2"></i> Yeni Ekle</a>
+                    </div>
+                </div>
+                <h4 class="header-title">Yazarlar</h4>
+                <table data-toggle="table" data-page-size="10" data-buttons-class="xs btn-light"
+                       class="table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Yazar Adı</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>
+                                    <a href="/Panel/Author/Edit/@item.Id" class="btn btn-success width-xs waves-effect waves-light">Düzenle</a>&nbsp&nbsp&nbsp
+                                    <a onclick="Delete(this)" itemscope itemid="@item.Id" class="btn btn-danger width-xs waves-effect waves-light">Sil</a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+                <div>
+                    <center>
+                        @Html.PagedListPager(Model, pg => "/Panel/Author/Index?pg=" + pg, new PagedListRenderOptions { DisplayLinkToFirstPage = PagedListDisplayMode.Always, DisplayLinkToLastPage = PagedListDisplayMode.Always })
+                    </center>
+                </div>
+            </div>
+        </div> <!-- end card -->
+    </div> <!-- end col-->
+</div>
+<link href="~/Content/PagedList.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    function Delete(item) {
+        var id = $(item).attr("itemid");
+        var btn = $(item);
+        Swal.fire({
+            title: 'Emin misin?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sil',
+            cancelButtonText: 'İptal',
+        }).then(val => {
+            if (val.isConfirmed) {
+                $.ajax({
+                    async: true,
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: id,
+                    dataType: 'html',
+                    url: '/Panel/Author/Delete?id=' + id,
+                    success: function (data) {
+                        Swal.fire(
+                            'Başarılı!',
+                            'Yazar silindi',
+                            'success'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/Author/Index')
+                        })
+                    },
+                    error: function () {
+                        //alert("Error Occurred!");
+                        swal({
+                            title: "FAIL",
+                            text: "ERROR OCCURRED",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>
+
+
+

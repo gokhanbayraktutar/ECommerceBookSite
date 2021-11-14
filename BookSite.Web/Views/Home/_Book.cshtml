@@ -1,0 +1,75 @@
+﻿@model BookSite.Data.Entities.Book
+@using BookSite.Web.Methods
+@{ 
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var user = db.Users.FirstOrDefault(x => x.Email == User.Identity.Name);
+
+
+    var book_pictures = db.Book_Pictures.ToList();
+
+    var favouriteId = 0;
+
+    try
+    {
+        favouriteId = db.Favorites.FirstOrDefault(x => x.BookId == Model.Id && x.UserId == user.Id).Id;
+    }
+    catch (Exception)
+    {
+
+
+    }
+}
+
+
+
+    <div class="card-image">
+        <img src="~/Upload/Image/@book_pictures.FirstOrDefault(x => x.BookId == Model.Id).Picture " style="width:221px" alt="">
+        <div class="hover-contents">
+            <a href="/kitapdetay/@Model.Id" class="hover-image">
+                <img src="~/Upload/Image/@book_pictures.FirstOrDefault(x => x.BookId == Model.Id).Picture " style="width:221px" alt="">
+            </a>
+            <div class="hover-btns">
+                <button class="single-btn" onclick="AddtoCart(this)" itemscope itemid="@Model.Id">
+                    <i class="fas fa-shopping-basket"></i>
+                </button>
+                @if (user != null)
+                {
+                    <input hidden id="UserId" value="@user.Id" />
+                }
+                else
+                {
+                    <input hidden id="UserId" value="" />
+                }
+
+
+                @if (favouriteId == 0)
+                {
+
+                    <button class="single-btn" title="Favorilerime Ekle" onclick="AddtoFavourite(this)" itemscope itemid="@Model.Id" id="favourite"><i class="fa fa-heart"></i></button>
+                }
+                else
+                {
+                    <button title="Favorilerimden Sil" onclick="DeletetoFavourite(this)" itemscope itemid="@Model.Id" class="add-link"><i class="fas fa-heart"></i></button>
+                }
+
+                <a href="compare.html" class="single-btn">
+                    <i class="fas fa-random"></i>
+                </a>
+                <a href="#" data-toggle="modal" data-target="#quickModal@(Model.Id)"
+                   class="single-btn">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="price-block">
+        <span class="price">₺ @SeoHelper.ShowPrice(Model.DiscountPrice, 2)</span>
+        <del class="price-old">₺ @SeoHelper.ShowPrice(Model.Price, 2)</del>
+        <span class="price-discount">@Model.DiscountPercentage%</span>
+    </div>
+    <div class="add-cart-btn">
+        <button class="btn btn-outlined--primary" onclick="AddtoCart(this)" itemscope itemid="@Model.Id">
+            <i class="fas fa-shopping-cart"></i>Sepete Ekle
+        </button>
+    </div>

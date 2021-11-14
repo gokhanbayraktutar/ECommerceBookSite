@@ -1,0 +1,81 @@
+﻿@model BookSite.Web.Models.HomeVM
+@using BookSite.Web.Methods
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+    var siteConstant = db.SiteConstants.FirstOrDefault();
+    string pageHeader = "Siparişlerim ";
+    ViewBag.Title = SeoHelper.HeaderWriter(siteConstant.Header, pageHeader);
+}
+
+<section class="breadcrumb-section">
+    <h2 class="sr-only">Site Breadcrumb</h2>
+    <div class="container">
+        <div class="breadcrumb-contents">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">AnaSayfa</a></li>
+                    <li class="breadcrumb-item active">Siparişlerim</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<section class="order-complete inner-page-sec-padding-bottom">
+    <div class="container">
+        <div class="row">
+
+
+            <center><h3 class="order-table-title">Sipariş Detayı</h3></center>
+            <div class="table-responsive">
+                <div class="cart-table table-responsive mb--40" id="carttbl">
+                    @if (Model.Carts.Count != 0)
+                    {
+                        <table class="table">
+                            <!-- Head Row -->
+                            <thead>
+                                <tr>
+                                    <th>Sipariş No:</th>
+                                    <th>Sipariş Tarihi</th>
+                                    <th>Sipariş Durumu</th>
+                                    <th>Ödenenen Toplam Tutar</th>
+                                    <th>Detay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cart in Model.Carts)
+                                {
+
+
+                                    <tr>
+                                        <td>@cart.OrderNo</td>
+                                        <td>@cart.OrderDate.ToShortDateString()</td>
+                                        @if (cart.OrderStatus == "Order Completed")
+                                        {
+                                            <td>Sipariş Tamamlandı.</td>
+                                        }
+
+                                        <td>@cart.TotalPaymentPrice ₺</td>
+                                        <td><a href="/SiparisDetay/@cart.Id" class="btn">Görüntüle</a></td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <table class="table">
+                            Siparişiniz bulunmamaktadır!
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+</section>

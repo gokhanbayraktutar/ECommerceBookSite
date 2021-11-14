@@ -1,0 +1,25 @@
+﻿
+@{
+    ViewBag.Title = "Error";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string style = "";
+    if (!Request.Browser.IsMobileDevice)
+    {
+        style = "margin-left:300px";
+    }
+}
+
+<div class="container">
+    <div class="row">
+        <div class="jumbotron text-center" style="margin-top:35px;@style">
+            <h1 class="display-3">Hata Oluştu!</h1>
+            @*<h3></h3>*@
+            <p class="lead"><strong>Lütfen Daha Sonra Tekrar Deneyiniz</strong></p>
+            <hr>
+            <p class="lead">
+                <a class="btn btn-primary btn-sm" href="/" role="button">Anasayfa</a>
+            </p>
+        </div>
+    </div>
+</div>
+

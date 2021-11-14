@@ -1,0 +1,11 @@
+﻿@model List<BookSite.Data.Entities.District>
+
+
+
+<label>İlçe*</label>
+<select class="form-control" id="District">
+    @foreach (var item in Model)
+    {
+        <option value="@item.Id">@item.Name</option>
+    }
+</select>

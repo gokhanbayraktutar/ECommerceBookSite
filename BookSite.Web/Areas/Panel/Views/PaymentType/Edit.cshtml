@@ -1,0 +1,93 @@
+﻿@model BookSite.Data.Entities.PaymentType
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/PaymentType/Index">Ödeme Seçenekleri</a></li>
+                    <li class="breadcrumb-item active">Ödeme Seçenekleri Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Ödeme Seçenekleri Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Başlık*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtHeader" value="@Model.Header">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">İçerik</label>
+                    <div class="col-8 col-xl-9">
+                        <textarea type="text" id="txtContent" style="height:200px" class="form-control">@Model.Content</textarea>
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/PaymentType/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function Edit(item) {
+        var id = $(item).attr("itemid");
+        var Header = $("#txtHeader").val();
+        var Content = $("#txtContent").val();
+        if (Header == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Başlık boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                async: true,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: id,
+                dataType: 'json',
+                url: '/Panel/PaymentType/Edit?id=' + id + '&Header=' + Header + '&Content=' + Content ,
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                         'Düzenlendi.',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/PaymentType/Index')
+                    })
+                },
+
+                error: function () {
+
+                    swal.fire({
+                        title: "Başarısız!",
+                        text: "Düzenlenemedi!",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+        }
+</script>

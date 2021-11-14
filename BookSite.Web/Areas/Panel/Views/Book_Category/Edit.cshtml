@@ -1,0 +1,126 @@
+﻿@model BookSite.Data.Entities.Book_Category
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var categories = db.Categories.ToList();
+
+    var book = db.Books.FirstOrDefault(x => x.Id == Model.BookId).Name;
+    var catname = db.Categories.FirstOrDefault(x => x.Id == Model.CategoryId).Name;
+
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Book/Index">Kitap-Kategoriler</a></li>
+                    <li class="breadcrumb-item active">Kitap-Kategori Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kitap-Kategori Bilgileri Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Kitap Adı</label>
+                    <div class="col-8 col-xl-9">
+                        <label class="col-8 col-form-label">@book</label>
+                        <input type="text" id="txtBookname" hidden value="@Model.BookId" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputPassword3" class="col-4 col-xl-3 col-form-label">Kategori Adı</label>
+                    <div class="col-8 col-xl-9">
+                        <div class='exampleSearch'>
+                            <select placeholder="Kategori seçiniz..." id="selectCategory">
+
+                                <option value="@Model.CategoryId">@catname</option>
+                                @foreach (var item in categories)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                        </div>
+                        <input type="text" id="Category" hidden value="@Model.CategoryId" class="form-control">
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Book_Author/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+
+
+<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#selectCategory').selectize();
+    });
+</script>
+
+<script>
+    function Edit(item) {
+        var selectCategory = $("#selectCategory").val();
+        var book = $("#txtBookname").val();
+        var category = $("#Category").val();
+
+        if (selectCategory == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Kategori adı boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                async: true,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: selectCategory,
+                dataType: 'json',
+                url: '/Panel/Book_Category/Edit?selectCategory=' + selectCategory + '&book=' + book + '&category=' + category,
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                        'Kitap-Kategori düzenlendi.',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/Book_Category/Index')
+                    })
+                },
+                error: function () {
+
+                    swal.fire({
+                        title: "Başarısız!",
+                        text: "Düzenlenemedi!",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    }
+</script>
+
+

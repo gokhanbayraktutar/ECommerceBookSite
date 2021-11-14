@@ -1,0 +1,33 @@
+﻿@model BookSite.Data.Entities.Book
+@{ 
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+    var user = db.Users.FirstOrDefault(x => x.Email == User.Identity.Name);
+
+    var favouriteId = 0;
+}
+
+@try
+{
+    favouriteId = db.Favorites.FirstOrDefault(x => x.BookId == Model.Id && x.UserId == user.Id).Id;
+}
+catch (Exception)
+{
+
+
+}
+@if (favouriteId == 0)
+{
+<div class="compare-wishlist-row">
+    <button onclick="AddtoFavouriteBookDetail(this)" itemscope itemid="@Model.Id" id="favourite" class="add-link"><i class="far fa-heart"></i>Favorilere Ekle</button>
+    <button itemscope itemid="@Model.Id" onclick="AddToCompare(this)" class="add-link"><i class="fas fa-random"></i>Karşılaştır</button>
+</div>
+
+}
+else
+{
+<div class="compare-wishlist-row">
+    <button onclick="DeletetoFavouriteBookDetail(this)" itemscope itemid="@Model.Id" class="add-link"><i class="fas fa-heart"></i>Favorilerimden sil</button>
+    <button itemscope itemid="@Model.Id" onclick="AddToCompare(this)" class="add-link"><i class="fas fa-random"></i>Karşılaştır</button>
+</div>
+}
+           

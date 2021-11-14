@@ -1,0 +1,120 @@
+﻿@model BookSite.Data.Entities.ContactPage
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Default/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a>İletim Sayfası Düzenle</a></li>
+                </ol>
+            </div>
+            <h4 class="page-title">İletim Sayfası Bilgileri Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Telefon</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtPhone" value="@Model.Phone"  data-toggle="input-mask" data-mask-format="(000) 000-0000">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Faks</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtFaks" value="@Model.Faks" data-toggle="input-mask" data-mask-format="(000) 000-0000" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Cep Tel.</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtGsm" value="@Model.Gsm" data-toggle="input-mask" data-mask-format="(000) 000-0000" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Email-1</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtEmail1" value="@Model.Email1" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Email2 </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtEmail2" value="@Model.Email2" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Adres </label>
+                    <div class="col-8 col-xl-9">
+                        <textarea type="text" id="txtAddress" name="Address" value="@Model.Address" class="form-control">@Model.Address</textarea>
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Default/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+
+<script>
+    function Edit(item) {
+        var data = new Object();
+        data.id = $(item).attr("itemid");
+        data.faks = $("#txtFaks").val();
+        data.phone = $("#txtPhone").val();
+        data.Gsm = $("#txtGsm").val();
+        data.email1 = $("#txtEmail1").val();
+        data.email2 = $("#txtEmail2").val();
+        data.address = $("#txtAddress").val();
+
+        if (data.phone == "" || data.email1 == "" || data.address == "") {
+            Swal.fire(
+                'Başarısız!',
+                ' Telefon, Adres ve Email-1 boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Panel/ContactPage/Edit",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                        'Düzenlendi',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/ContactPage/Edit/1')
+                    })
+                },
+
+                error: function () {
+
+                    swal.fire({
+                        title: "Başarısız!",
+                        text: "Düzenlenemedi!",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    }
+</script>

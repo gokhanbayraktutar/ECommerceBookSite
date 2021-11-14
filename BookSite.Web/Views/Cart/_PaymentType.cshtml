@@ -1,0 +1,27 @@
+﻿@model BookSite.Data.Entities.Cart
+
+
+@if (ViewBag.PaymentType == "Kredi Kartı")
+{
+    <div class="row">
+            @*to test if we can get the token or not*@
+            <strong>@ViewBag.token</strong>
+            <br />
+            <script src="//checkout.stripe.com/v2/checkout.js"
+                    class="stripe-button"
+                    data-key="@ViewBag.StripePublishKey"
+                    data-locale="auto"
+                    data-description="Sample Charge"
+                    data-amount="@(Model.TotalPaymentPrice*100)"
+                    data-currency="TRY">
+            </script>
+    </div>
+}
+
+else if (ViewBag.PaymentType == "Kapıda Ödeme")
+{
+    <button type="submit" class="place-order w-100">Sipariş Ver</button>
+}
+
+
+

@@ -1,0 +1,140 @@
+﻿@model BookSite.Data.Entities.SiteConstant
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item active">Site Sabitleri Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Site Sabitleri Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Firma Adı</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtHeader" value="@Model.Header">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">İçerik</label>
+                    <div class="col-8 col-xl-9">
+                        <textarea type="text" id="txtContent" style="height:100px" value="@Model.Content" class="form-control">@Model.Content</textarea>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Çalışma Saatleri</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtWorkTime" class="form-control" value="@Model.WorkTime">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Logo </label>
+                    <div class="col-xl-6">
+                        <div class="mb-3 mb-xl-0">
+                            <input class="form-control" type="file" id="ImageFile">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Eski Logo</label>
+                    <div class="col-sm-2">
+                        @if (Model.Logo != null)
+                        {
+                            <img src="~/Upload/Image/@Model.Logo" width="300" />
+                        }
+                    </div>
+                </div>
+
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Default/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function Edit(item) {
+
+        var data = new FormData();
+        var Id = $(item).attr("itemid");
+        var Header = $("#txtHeader").val();
+        var Content = $("#txtContent").val();
+        var WorkTime = $("#txtWorkTime").val();
+        data.append("Id", Id);
+        data.append("Header", Header);
+        data.append("Content", Content);
+        data.append("WorkTime", WorkTime);
+        /*  *//*data.ImageFile = $("#ImageFile").val();*/
+        var files = $("#ImageFile").get(0).files;
+        if (files.length > 0) {
+            data.append("ImageFile", files[0]);
+        }
+        if (data.header == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Firma Adı boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: data,
+                url: "/Panel/SiteConstant/Edit",
+                success: function (response) {
+                    if (response == 0) {
+                        Swal.fire(
+                            'Başarılı!',
+                            'Düzenlendi',
+                            'success'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/SiteConstant/Edit/1')
+                        })
+                    } else {
+                        Swal.fire(
+                            'Hata!',
+                            'Resim formatında dosya seçiniz!',
+                            'error'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/SiteConstant/Edit/1')
+                        })
+                    }
+
+                },
+
+                error: function (data) {
+
+                    swal.fire({
+                        title: "Başarısız",
+                        text: "Eklenemedi.",
+                        icon: "error"
+                    }).then(function () {
+                        location.reload();
+                    })
+                }
+            });
+        }
+    }
+</script>
+

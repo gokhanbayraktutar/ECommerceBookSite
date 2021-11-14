@@ -1,0 +1,135 @@
+﻿@model BookSite.Data.Entities.Book_Publisher
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+
+    var publishers = db.Publishers.ToList();
+
+    var books = db.Books.ToList();
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Book_Publisher/Index">Kitap-Yayıncılar</a></li>
+                    <li class="breadcrumb-item active">Kitap-Yayıncı Ekle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kitap-Yayıncı Ekleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-4 col-xl-3 col-form-label">Kitap Adı</label>
+                    <div class="col-8 col-xl-9">
+                        <div class='exampleSearch'>
+                            <select  id="Name">
+                                <option>Kitap seçiniz</option>
+                                @foreach (var item in books)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputPassword3" class="col-4 col-xl-3 col-form-label">Yayıncı Adı</label>
+                    <div class="col-8 col-xl-9">
+                        <div class='exampleSearch'>
+                            <select  id="Publisher">
+                                <option>Yayıncı seçiniz</option>
+                                @foreach (var item in publishers)
+                                {
+
+                                    <option value="@item.Id">@item.Name</option>
+
+                                }
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Create(this)" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Book_Publisher/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+
+<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+    function Create(item) {
+        var bookid = $("#Name").val();
+        var publisherid = $("#Publisher").val();
+
+
+        if (bookid == "Kitap seçiniz." || publisherid == "Yayıncı seçiniz.") {
+            Swal.fire(
+                'Başarısız!',
+                'Kitap adı ve Yayıncı adı boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                async: true,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: bookid,
+                dataType: 'json',
+                url: '/Panel/Book_Publisher/Create?bookid=' + bookid + '&publisherid=' + publisherid,
+                success: function (data) {
+                    if (data.success) {
+                        Swal.fire(
+                            'Başarılı!',
+                            'Kitap-Yayıncı Eklendi',
+                            'success'
+                        ).then(function () {
+                            $(window).attr('location', '/Panel/Book_Publisher/Index')
+                        })
+                    }
+                },
+
+                error: function (data) {
+
+                    swal.fire({
+                        title: "Başarısız",
+                        text: "Eklenemedi.",
+                        icon: "error"
+                    }).then(function () {
+                        location.reload();
+                    })
+                }
+            });
+        }
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#Name').selectize();
+    });
+    $(document).ready(function () {
+        $('#Publisher').selectize();
+    });
+</script>

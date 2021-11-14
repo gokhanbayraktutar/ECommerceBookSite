@@ -1,0 +1,99 @@
+﻿
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Admin/Index">Kullanıcılar</a></li>
+                    <li class="breadcrumb-item active">Kullanıcı Ekle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kullanıcı Ekleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Kullanıcı Adı*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtUsername">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Şifre*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="password" id="txtPsw" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Email*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="Email" class="form-control">
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Create(this)" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Admin/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function Create(item) {
+        var username = $("#txtUsername").val();
+        var password = $("#txtPsw").val();
+        var email = $("#Email").val();
+        if (username == "" || password == "" || email == "") {
+            Swal.fire(
+                'Başarısız!',
+                'Kulanıcı adı, Email, Şifre boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                async: true,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: username,
+                dataType: 'json',
+                url: '/Panel/Admin/Create?username=' + username + '&password=' + password + '&email=' + email,
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                        username + '  adlı kullanıcı eklendi.',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/Admin/Index')
+                    })
+                },
+
+                error: function (data) {
+
+                    swal.fire({
+                        title: "Başarısız",
+                        text: "Eklenemedi.",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    }
+</script>

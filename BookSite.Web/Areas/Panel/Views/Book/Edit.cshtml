@@ -1,0 +1,196 @@
+﻿@model BookSite.Data.Entities.Book
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Book/Index">Kitaplar</a></li>
+                    <li class="breadcrumb-item active">Kitap Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Kitap Düzenleme</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Kitap Adı*</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" id="txtName" value="@Model.Name">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">İçerik</label>
+                    <div class="col-8 col-xl-9">
+                        <textarea type="text" id="txtContent" style="height:200px" value="@Model.Content" class="form-control">@Model.Content</textarea>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">ISBN</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtISBN" value="@Model.ISBN" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Sayfa Sayısı</label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtPageCount" value="@Model.PageCount" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Boyut </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtSize" value="@Model.Size" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Yayın Tarihi </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" class="form-control" data-toggle="input-mask" value="@Model.PublishDate"   data-mask-format="00/00/0000" maxlength="10" id="txtPublishdate">
+                        <span class="font-13 text-muted">e.g "DD/MM/YYYY"</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Fiyat (₺) * </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtPrice" value="@Model.Price" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">İndirim Oranı (0-100 arasında) * </label>
+                    <div class="col-8 col-xl-9">
+                        <input type="text" id="txtDiscount" value="@Model.DiscountPercentage" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">En Çok Satanlar Durumu *</label>
+                    <div class="col-8 col-xl-9">
+                        <div class="mb-3 col-md-4">
+                            <select id="BestSellerStatus" class="form-select">
+                                @if (Model.BestSellerStatus == true)
+                                {
+                                    <option value="true">Evet</option>
+                                    <option value="false">Hayır</option>
+                                }
+                                else
+                                {
+                                    <option value="false">Hayır</option>
+                                    <option value="true">Evet</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Yeni Çıkanlar Durumu * </label>
+                    <div class="col-8 col-xl-9">
+                        <div class="mb-3 col-md-4">
+                            <select id="NewReleasesStatus" class="form-select">
+                                @if (Model.NewReleasesStatus == true)
+                                {
+                                    <option value="true">Evet</option>
+                                    <option value="false">Hayır</option>
+                                }
+                                else
+                                {
+                                    <option value="false">Hayır</option>
+                                    <option value="true">Evet</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-4 col-xl-3 col-form-label">Kampanya Durumu * </label>
+                    <div class="col-8 col-xl-9">
+                        <div class="mb-3 col-md-4">
+                            <select id="DealsStatus" class="form-select">
+                                @if (Model.DealsStatus == true)
+                                {
+                                    <option value="true">Evet</option>
+                                    <option value="false">Hayır</option>
+                                }
+                                else
+                                {
+                                    <option value="false">Hayır</option>
+                                    <option value="true">Evet</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="justify-content-end row">
+                    <div class="col-8 col-xl-9">
+                        <button type="submit" onclick="Edit(this)" itemscope itemid="@Model.Id" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                        <a href="/Panel/Default/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                    </div>
+                </div>
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+
+
+<script>
+    function Edit(item) {
+        var bookdata = new Object();
+        bookdata.id = $(item).attr("itemid");
+        bookdata.name = $("#txtName").val();
+        bookdata.content = $("#txtContent").val();
+        bookdata.pagecount = $("#txtPageCount").val();
+        bookdata.size = $("#txtSize").val();
+        bookdata.publishdate = $("#txtPublishdate").val();
+        bookdata.price = $("#txtPrice").val();
+        bookdata.discountpercentage = $("#txtDiscount").val();
+        bookdata.BestSellerStatus = $("#BestSellerStatus").val();
+        bookdata.NewReleasesStatus = $("#NewReleasesStatus").val();
+        bookdata.DealsStatus = $("#DealsStatus").val();
+        bookdata.ISBN = $("#txtISBN").val();
+
+        if (bookdata.name == "" || bookdata.price == "" || bookdata.bestsellerstatus == "Seçiniz" || bookdata.newReleasesStatus == "Seçiniz" || bookdata.dealsStaus == "Seçiniz") {
+            Swal.fire(
+                'Başarısız!',
+                'Kitap adı, Fiyatı,Yeni çıkanlar, Çok satanlar, Kampanya durumu  boş olamaz!',
+                'error'
+            )
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Panel/Book/Edit",
+                data: JSON.stringify(bookdata),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    Swal.fire(
+                        'Başarılı!',
+                        'Düzenlendi',
+                        'success'
+                    ).then(function () {
+                        $(window).attr('location', '/Panel/Book/Index')
+                    })
+                },
+
+                error: function () {
+
+                    swal.fire({
+                        title: "Başarısız!",
+                        text: "Düzenlenemedi!",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    }
+</script>
