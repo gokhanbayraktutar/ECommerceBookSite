@@ -44,11 +44,11 @@ namespace BookSite.Web.Controllers
         {
             //LOCAL AYARLARI 
             var response = Request["g-recaptcha-response"];
-            const string secret = "6LcBa68cAAAAAJyI5EpcF2_ZdF9muCeBmXcXQcxF";
+            //const string secret = "6LcBa68cAAAAAJyI5EpcF2_ZdF9muCeBmXcXQcxF";
 
             //WebSite 
 
-            //const string secret = "6Le7xDMdAAAAAAoeDFCd0H8ej_H6A85zq3491NeC";
+            const string secret = "6le7xdmdaaaaaaoedfcd0h8ej_h6a85zq3491nec";
 
 
             var client = new WebClient();
@@ -58,12 +58,12 @@ namespace BookSite.Web.Controllers
 
             var captchaResponse = JsonConvert.DeserializeObject<CaptchaResponse>(reply);
 
-            if (!captchaResponse.Success)
-            {
+            //if (!captchaResponse.Success)
+            //{
 
-                ViewBag.error = "Lütfen Kutucuğu işaretleyiniz!";
-                return View();
-            }
+            //    ViewBag.error = "Lütfen Kutucuğu işaretleyiniz!";
+            //    return View();
+            //}
 
 
 
