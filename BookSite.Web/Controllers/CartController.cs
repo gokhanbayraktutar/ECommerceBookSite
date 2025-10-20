@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity.Migrations;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -310,8 +311,6 @@ namespace BookSite.Web.Controllers
             if (paymenttypeId == 2)
             {
                 ViewBag.PaymentType = "Kredi Kartı";
-                ViewBag.StripePublishKey = ConfigurationManager.AppSettings["stripePublishableKey"];
-
                 ViewBag.TotalPrice = cart.TotalPaymentPrice;
             }
 
@@ -320,15 +319,12 @@ namespace BookSite.Web.Controllers
                 ViewBag.PaymentType = "Kapıda Ödeme";
 
             }
-
-
             return PartialView("_PaymentType", cart);
         }
 
         [Route("siparisver")]
-        [Obsolete]
         [HttpPost]
-        public ActionResult Order(Cart cart, string agree, string stripeToken, string stripeEmail)
+        public async Task<ActionResult> Order(Cart cart, string agree, string CardHolderName, string CardNumber, string ExpireMonth, string ExpireYear, string Cvc)
         {
             if (cart.CargoID == 0)
             {
@@ -339,71 +335,167 @@ namespace BookSite.Web.Controllers
 
             try
             {
-                if (agree == "true")
+                if (agree != "true")
                 {
-                    var dbCart = db.Carts.FirstOrDefault(x => x.Id == cart.Id);
-                    dbCart.CargoID = cart.CargoID;
-                    var cargoPrice = db.Cargos.FirstOrDefault(x => x.Id == cart.CargoID).Price;
-                    dbCart.CargoPrice = (decimal)cargoPrice;
-                    dbCart.City = cart.City;
-                    dbCart.DeliveryAdress = cart.DeliveryAdress;
-                    dbCart.District = cart.District;
-                    dbCart.PhoneNumber = cart.PhoneNumber;
-                    dbCart.OrderDate = DateTime.Now;
-                    dbCart.OrderNo = Guid.NewGuid().ToString().Substring(0, 9).Replace("-", "").ToUpper();
-                    dbCart.PaymentType = cart.PaymentType;
-                    dbCart.TotalPaymentPrice = (decimal)dbCart.TotalPrice + dbCart.CargoPrice;
-                    dbCart.OrderStatus = "Order Completed";
-                    dbCart.OrderNote = cart.OrderNote;
-                    var user = db.Users.FirstOrDefault(x => x.Id == dbCart.UserID);
-                    dbCart.Name = user.Name;
-                    dbCart.LastName = user.Lastname;
-                    dbCart.TotalPaymentPrice = Convert.ToDecimal(dbCart.TotalPrice) + dbCart.CargoPrice;
-                    //Cart cart1 = null;
-                    db.Entry(dbCart).State = System.Data.Entity.EntityState.Modified;
-                    db.SaveChanges();
-
-                    if (cart.PaymentType == "Kredi Kartı")
-                    {
-                        Stripe.StripeConfiguration.SetApiKey("pk_test_51HwulVL9nW7sdhKB4QAVgIibx3sx6cQbG1CESA4R8C5RUlTCq9Pg8FYhlluYVDQn2M90aPufa03hQMtHplPigS2K00LmrGzfF3");
-                        Stripe.StripeConfiguration.ApiKey = "sk_test_51HwulVL9nW7sdhKBonrtCOOJE2KDB5ZBU6W0nVt7gvpnLipTYPxUdJOC7YrJaYx1XJOmP2J75tliAnizm7wFys5u00BG3Zg9HF";
-
-                        var myCharge = new Stripe.ChargeCreateOptions();
-                        // always set these properties
-                        myCharge.Amount = (long)(dbCart.TotalPaymentPrice * 100);
-                        myCharge.Currency = "TRY";
-                        myCharge.ReceiptEmail = stripeEmail;
-                        myCharge.Description = "Sample Charge";
-                        myCharge.Source = stripeToken;
-                        myCharge.Capture = true;
-                        var chargeService = new Stripe.ChargeService();
-                        Charge stripeCharge = chargeService.Create(myCharge);
-                        ViewBag.token = "Ödeme başarıl!";
-                        ViewBag.mail = stripeEmail;
-
-                        return View("Success", dbCart);
-
-                    }
-                    else
-                    {
-                        return View("Success", dbCart);
-                    }
-
-                }
-                else
-                {
-                    TempData["error"] = "Lütfen ŞartlarıKabul Etmek İçin Kutuyu İşaretleyiniz!";
+                    TempData["error"] = "Lütfen Şartları Kabul Etmek İçin Kutuyu İşaretleyiniz!";
                     TempData.Keep();
                     return RedirectToAction("Checkout");
                 }
 
-            }
-            catch (Exception)
+                var dbCart = db.Carts.FirstOrDefault(x => x.Id == cart.Id);
+                dbCart.CargoID = cart.CargoID;
+                var cargoPrice = db.Cargos.FirstOrDefault(x => x.Id == cart.CargoID).Price;
+                dbCart.CargoPrice = (decimal)cargoPrice;
+                dbCart.City = cart.City;
+                dbCart.DeliveryAdress = cart.DeliveryAdress;
+                dbCart.District = cart.District;
+                dbCart.PhoneNumber = cart.PhoneNumber;
+                dbCart.OrderDate = DateTime.Now;
+                dbCart.OrderNo = Guid.NewGuid().ToString().Substring(0, 9).Replace("-", "").ToUpper();
+                dbCart.PaymentType = cart.PaymentType;
+                dbCart.TotalPaymentPrice = (decimal)dbCart.TotalPrice + dbCart.CargoPrice;
+                dbCart.OrderStatus = "Order Completed";
+                dbCart.OrderNote = cart.OrderNote;
+
+                var user = db.Users.FirstOrDefault(x => x.Id == dbCart.UserID);
+                dbCart.Name = user.Name;
+                dbCart.LastName = user.Lastname;
+
+                db.Entry(dbCart).State = System.Data.Entity.EntityState.Modified;
+                db.SaveChanges();
+
+                // ---- IYZICO BAŞLANGIÇ ----
+                var paymentTypeValue = cart.PaymentType ?? dbCart.PaymentType;
+                if (string.Equals(paymentTypeValue, "2", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Basit input temizleme (kart numarasından boşlukları kaldır)
+                    var rawCard = (CardNumber ?? "").Replace(" ", "").Trim();
+
+                    // Doğrudan formdan boş kart geliyorsa işlemi durdur
+                    if (string.IsNullOrEmpty(rawCard) || string.IsNullOrEmpty(Cvc) || string.IsNullOrEmpty(ExpireMonth) || string.IsNullOrEmpty(ExpireYear))
+                    {
+                        ViewBag.Message = "Kart bilgileri eksik gönderildi.";
+                        ViewBag.Debug = new { CardNumber = rawCard, Cvc, ExpireMonth, ExpireYear };
+                        return View("Error");
+                    }
+
+                    var options = new Iyzipay.Options
+                    {
+                        ApiKey = ConfigurationManager.AppSettings["IyzipayApiKey"],
+                        SecretKey = ConfigurationManager.AppSettings["IyzipaySecretKey"],
+                        BaseUrl = "https://sandbox-api.iyzipay.com"
+                    };
+
+                    var request = new Iyzipay.Request.CreatePaymentRequest
+                    {
+                        Locale = Iyzipay.Model.Locale.TR.ToString(),
+                        ConversationId = Guid.NewGuid().ToString(),
+                        Price = dbCart.TotalPaymentPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                        PaidPrice = dbCart.TotalPaymentPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                        Currency = Iyzipay.Model.Currency.TRY.ToString(),
+                        Installment = 1,
+                        BasketId = dbCart.Id.ToString(),
+                        PaymentChannel = Iyzipay.Model.PaymentChannel.WEB.ToString(),
+                        PaymentGroup = Iyzipay.Model.PaymentGroup.PRODUCT.ToString()
+                    };
+
+                    request.PaymentCard = new Iyzipay.Model.PaymentCard
+                    {
+                        CardHolderName = CardHolderName,
+                        CardNumber = rawCard,
+                        ExpireMonth = ExpireMonth,
+                        ExpireYear = ExpireYear,
+                        Cvc = Cvc,
+                        RegisterCard = 0
+                    };
+
+                    request.Buyer = new Iyzipay.Model.Buyer
+                    {
+                        Id = user?.Id.ToString() ?? "0",
+                        Name = user?.Name ?? "Guest",
+                        Surname = user?.Lastname ?? "",
+                        Email = user?.Email ?? "test@example.com",
+                        GsmNumber = user?.Phone ?? "+905551234567",
+                        IdentityNumber = "11111111111",
+                        City = dbCart.City, // <-- BU SATIRI EKLEYİN
+                        Country = "Turkey",
+                        RegistrationAddress = dbCart.DeliveryAdress,
+                        Ip = Request.UserHostAddress
+                    };
+
+                    var address = new Iyzipay.Model.Address
+                    {
+                        ContactName = (user?.Name ?? "") + " " + (user?.Lastname ?? ""),
+                        City = dbCart.City,
+                        Country = "Turkey",
+                        Description = dbCart.DeliveryAdress
+                    };
+                    request.ShippingAddress = address;
+                    request.BillingAddress = address;
+
+                    request.BasketItems = new List<Iyzipay.Model.BasketItem>
             {
+                new Iyzipay.Model.BasketItem
+                {
+                    Id = "BI101",
+                    Name = "Kitap Siparişi",
+                    Category1 = "Kitap",
+                    ItemType = Iyzipay.Model.BasketItemType.PHYSICAL.ToString(),
+                    Price = dbCart.TotalPaymentPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)
+                }
+            };
+
+                    // Çağrıyı yap ve dönen objeyi debug ile göster
+                    var payment = await Iyzipay.Model.Payment.Create(request, options);
+
+                    // Debug: tüm payment objesini view'e ver (geçici, test için)
+                    ViewBag.PaymentRaw = payment;
+
+                    // İyzico'nun döndürdüğü status değişkeninin tam değerine bak — büyük küçük harf duyarlı olabilir
+                    var status = (payment?.Status ?? "").ToString();
+                    // Normalize et (büyük harf)
+                    var normalizedStatus = status.ToUpperInvariant();
+
+                    // Eğer SUCCESS ise devam et
+                    if (normalizedStatus == "SUCCESS")
+                    {
+                        // Ödeme başarılıysa gerekli sipariş güncellemelerini yap
+                        dbCart.OrderStatus = "Payment Received";
+                        db.Entry(dbCart).State = System.Data.Entity.EntityState.Modified;
+                        db.SaveChanges();
+
+                        ViewBag.Message = "Ödeme Başarılı!";
+                        ViewBag.Payment = payment;
+                        return View("Success", dbCart);
+                    }
+                    else
+                    {
+                        // Hata ayrıntılarını göster
+                        ViewBag.Message = "İyzico Ödeme Hatası";
+                        ViewBag.Payment = payment;
+                        ViewBag.ErrorPayment = new Dictionary<string, string>
+                        {
+                            { "Status", payment?.Status },
+                            { "ErrorCode", payment?.ErrorCode },
+                            { "ErrorGroup", payment?.ErrorGroup },
+                            { "ErrorMessage", payment?.ErrorMessage }
+                        };
+                        return View("Error");
+                    }
+                }
+                // -------------------- İYZICO BLOĞU BİTİŞ --------------------
+
+                // Eğer farklı bir ödeme tipi ise (ör. Kapıda Ödeme), normal success dönebilir
+                return View("Success", dbCart);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Bir hata oluştu: " + ex.Message + " | " + ex.InnerException?.Message;
                 return View("Error");
             }
-
         }
+
+
 
 
         [Route("siparislerim")]

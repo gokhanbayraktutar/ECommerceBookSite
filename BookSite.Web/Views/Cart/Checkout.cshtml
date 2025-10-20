@@ -107,7 +107,7 @@
                                         </div>
 
 
-                                        <div class="col-md-6 col-12 mb--20" style="display:none" id="pym">
+                                        <div class="col-md-6 col-12 mb--20"  id="pym">
                                             <label>Ödeme Tipi*</label>
                                             <select class="form-control" name="PaymentType" onchange="ChangePaymentType(this)" id="PaymentType">
                                                 @foreach (var type in Model.PaymentTypes.OrderByDescending(x=>x.Id))
@@ -240,7 +240,7 @@
 
         var cargoId = $("#Cargo").val();
         var totalPrice = $("#TotalPrice").val();
-
+            
         $.ajax({
             type: "POST",
             processData: false,
@@ -249,7 +249,7 @@
             url: '/kargoGetir/?cargoId=' + cargoId + '&totalPrice=' + totalPrice,
             success: function (response) {
                 $("#CargoPrice").html(response);
-                document.getElementById("pym").style.display = "";
+               /* document.getElementById("pym").style.display = "";*/
             },
             error: function (er) {
                 alert("Hata Oluştu!");

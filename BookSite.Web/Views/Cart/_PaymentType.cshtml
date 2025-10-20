@@ -1,27 +1,77 @@
 ﻿@model BookSite.Data.Entities.Cart
 
-
 @if (ViewBag.PaymentType == "Kredi Kartı")
 {
     <div class="row">
-            @*to test if we can get the token or not*@
-            <strong>@ViewBag.token</strong>
-            <br />
-            <script src="//checkout.stripe.com/v2/checkout.js"
-                    class="stripe-button"
-                    data-key="@ViewBag.StripePublishKey"
-                    data-locale="auto"
-                    data-description="Sample Charge"
-                    data-amount="@(Model.TotalPaymentPrice*100)"
-                    data-currency="TRY">
-            </script>
+        <h5>Kredi Kartı ile Ödeme</h5>
+        
+
+            <input type="hidden" name="CartId" value="@Model.Id" />
+
+            <div class="form-group mb-2">
+                <label>Kart Sahibinin Adı Soyadı</label>
+                <input type="text" name="CardHolderName" class="form-control" required />
+            </div>
+
+            <div class="form-group mb-2">
+                <label>Kart Numarası</label>
+                <input type="text" id="CardNumber" name="CardNumber" class="form-control" placeholder="4111 1111 1111 1111" required maxlength="19" />
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <label>Ay (MM)</label>
+                    <input type="number" name="ExpireMonth" maxlength="2" class="form-control"  required />
+                </div>
+                <div class="col-md-4">
+                    <label>Yıl (YYYY)</label>
+                    <input type="number" name="ExpireYear" maxlength="2" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label>CVC</label>
+                    <input type="number" name="Cvc" maxlength="3" class="form-control"  required />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Ödemeyi Tamamla</button>
+
+        <div class="col-md-12">
+            <div class="alert alert-info mt-3">
+                <strong>Test Kart Bilgisi:</strong><br />
+                Kart Numarası: 5526 0800 0000 0006<br />
+                SKT: 30<br />
+                CVC: 123
+            </div>
+        </div>
     </div>
 }
 
 else if (ViewBag.PaymentType == "Kapıda Ödeme")
 {
-    <button type="submit" class="place-order w-100">Sipariş Ver</button>
+    <form action="/Cart/siparisver" method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <input type="hidden" name="PaymentType" value="Kapıda Ödeme" />
+        <input type="hidden" name="agree" value="true" />
+        <button type="submit" class="place-order w-100">Sipariş Ver</button>
+    </form>
 }
 
+<script>
+    const cardInput = document.getElementById('CardNumber');
 
+    cardInput.addEventListener('input', function (e) {
+        let value = this.value.replace(/\D/g, ''); // sadece rakam bırak
+        let formattedValue = '';
+        for (let i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) formattedValue += ' '; // 4 hanelik bloklar
+            formattedValue += value[i];
+        }
+        this.value = formattedValue;
+    });
 
+    // form submit olmadan önce boşlukları temizle
+    const form = cardInput.closest('form');
+    form.addEventListener('submit', function () {
+        cardInput.value = cardInput.value.replace(/\s/g, '');
+    });
+</script>
