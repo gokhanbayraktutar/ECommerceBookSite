@@ -354,7 +354,7 @@ namespace BookSite.Web.Controllers
                 dbCart.OrderNo = Guid.NewGuid().ToString().Substring(0, 9).Replace("-", "").ToUpper();
                 dbCart.PaymentType = cart.PaymentType;
                 dbCart.TotalPaymentPrice = (decimal)dbCart.TotalPrice + dbCart.CargoPrice;
-                dbCart.OrderStatus = "Order Completed";
+                dbCart.OrderStatus = "Sipariş Oluşturuldu";
                 dbCart.OrderNote = cart.OrderNote;
 
                 var user = db.Users.FirstOrDefault(x => x.Id == dbCart.UserID);
@@ -460,7 +460,7 @@ namespace BookSite.Web.Controllers
                     if (normalizedStatus == "SUCCESS")
                     {
                         // Ödeme başarılıysa gerekli sipariş güncellemelerini yap
-                        dbCart.OrderStatus = "Payment Received";
+                        dbCart.OrderStatus = "Sipariş Oluşturuldu";
                         db.Entry(dbCart).State = System.Data.Entity.EntityState.Modified;
                         db.SaveChanges();
 

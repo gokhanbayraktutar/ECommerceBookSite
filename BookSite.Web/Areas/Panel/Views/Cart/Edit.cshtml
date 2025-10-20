@@ -1,0 +1,134 @@
+﻿@model BookSite.Data.Entities.Cart
+@using BookSite.Web.Methods
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Areas/Panel/Views/Shared/_Layout.cshtml";
+
+    BookSite.Data.Context.DataContext db = new BookSite.Data.Context.DataContext();
+    var cartContents = db.CartContents.Where(x => x.CartId == Model.Id);
+
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/Panel/Home/Index">AnaSayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/Panel/Cart/Index">Siparişler</a></li>
+                    <li class="breadcrumb-item active">Sipariş Düzenle</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Sipariş Detay</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title mb-3">Sipariş Detay</h4>
+
+                <h5 class="font-family-primary fw-semibold">@Model.User.Name @Model.User.Lastname  </h5>
+
+                <p class="mb-2"><span class="fw-semibold me-2">Sipariş No:</span>@Model.OrderNo</p>
+                <p class="mb-2"><span class="fw-semibold me-2">Sipariş Tutarı(₺):</span>@Model.TotalPrice </p>
+                <p class="mb-2"><span class="fw-semibold me-2">Sipariş Notu:</span>@Model.OrderNote </p>
+
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+
+        <div class="card">
+            <div class="card-body">
+                <table id="datatable" class="table dt-responsive nowrap w-100">
+                    <thead>
+                        <tr>
+
+                            <th class="pro-thumbnail">Kitap-Resim</th>
+                            <th class="pro-title">Kitap Adı</th>
+                            <th class="pro-price">Birim Fiyat</th>
+                            <th class="pro-quantity">Adet</th>
+                            <th class="pro-subtotal">Toplam Fiyat</th>
+                        </tr>
+                    </thead>
+
+
+                    @{
+                        var bookIds = cartContents.Select(x => x.BookId).ToList();
+                        var books = db.Books.Where(x => bookIds.Contains(x.Id)).ToList();
+                        var pictures = db.Book_Pictures.Where(x => bookIds.Contains(x.BookId)).ToList();
+                    }
+
+                    <tbody>
+                        @foreach (var item in cartContents)
+                        {
+                            var book = books.FirstOrDefault(x => x.Id == item.BookId);
+                            var picture = pictures.FirstOrDefault(x => x.BookId == item.BookId)?.Picture;
+
+                            <tr id="row_@item.Id">
+                                <td>
+                                    <a href="~/Upload/Image/@picture" class="image-popup">
+                                        <img src="~/Upload/Image/@picture" class="img-fluid" alt="work-thumbnail" style="width:100px" />
+                                    </a>
+
+                                </td>
+                                <td class="pro-title"><a href="#">@book.Name</a></td>
+                                <td class="pro-price"><span>@SeoHelper.ShowPrice(Convert.ToDouble(item.Price), 2) ₺</span></td>
+                                <td class="pro-quantity" id="qty_@item.Id">
+                                    <div class="pro-qty">
+                                        <div class="count-input-block">
+                                            @item.Count
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="pro-subtotal"><span>@SeoHelper.ShowPrice(Convert.ToDouble(item.TotalPrice), 2) ₺</span></td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+
+            </div> <!-- end card body-->
+        </div> <!-- end card -->
+    </div><!-- end col-->
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form enctype="multipart/form-data" method="post" role="form">
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-4 col-xl-3 col-form-label">Sipariş Durumu</label>
+                        <div class="col-8 col-xl-9">
+                            <div class='exampleSearch'>
+                                <select name="OrderStatus" class="form-select">
+
+                                    <option selected disabled value="">@Model.OrderStatus</option>
+                                    <option value="Sipariş Hazırlanıyor">Sipariş Hazırlanıyor</option>
+                                    <option value="Sipariş Kargoda">Sipariş Kargoda</option>
+                                    <option value="Sipariş Teslim Edildi">Sipariş Teslim Edildi</option>
+                                </select>
+                            </div>
+                            <div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="justify-content-end row">
+                        <div class="col-8 col-xl-9">
+                            <button type="submit" class="btn btn-success waves-effect waves-light">Kaydet</button>
+                            <a href="/Panel/Book_Author/Index" type="reset" class="btn btn-secondary waves-effect">İptal et</a>
+                        </div>
+                    </div>
+                </form>
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div>
+</div>
+

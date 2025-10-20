@@ -218,6 +218,7 @@
     <Compile Include="Areas\Panel\Controllers\AdminController.cs" />
     <Compile Include="Areas\Panel\Controllers\AuthorController.cs" />
     <Compile Include="Areas\Panel\Controllers\BaseController.cs" />
+    <Compile Include="Areas\Panel\Controllers\CartController.cs" />
     <Compile Include="Areas\Panel\Controllers\BookController.cs" />
     <Compile Include="Areas\Panel\Controllers\Book_PictureController.cs" />
     <Compile Include="Areas\Panel\Controllers\Book_StockController.cs" />
@@ -490,6 +491,8 @@
     <Content Include="Areas\Panel\Content\Cropper\cropper.js" />
     <Content Include="Areas\Panel\Content\Cropper\dropzone.css" />
     <Content Include="Areas\Panel\Content\Cropper\dropzone.js" />
+    <Content Include="Areas\Panel\Views\Cart\Index.cshtml" />
+    <Content Include="Areas\Panel\Views\Cart\Edit.cshtml" />
     <None Include="Configs\connectionStrings.config" />
     <Content Include="Content\assets\css\main.css" />
     <Content Include="Content\assets\css\plugins.css" />
